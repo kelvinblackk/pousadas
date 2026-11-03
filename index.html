@@ -101,13 +101,14 @@ section{padding:96px 0;position:relative}
 @media (max-width:560px){.float-card{left:8px;bottom:8px}}
 
 /* faixa de fotos */
-.marquee{overflow:hidden;padding:6px 0 0;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.track{display:flex;gap:14px;width:max-content;animation:slide 60s linear infinite}
-.marquee:hover .track{animation-play-state:paused}
+.marquee{overflow:hidden;padding:6px 0 0;display:grid;gap:14px;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none;mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee.drag{cursor:grabbing}
+.track{display:flex;gap:14px;width:max-content;will-change:transform}
 .track figure{margin:0;position:relative;width:260px;flex:none}
+.track img{pointer-events:none;-webkit-user-drag:none}
+@media (max-width:560px){.track figure{width:200px}}
 .track img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:16px}
 .track figcaption{position:absolute;left:10px;bottom:10px;font-size:.75rem;font-weight:700;background:rgba(0,0,0,.55);color:#fff;border-radius:999px;padding:3px 10px;backdrop-filter:blur(4px)}
-@keyframes slide{to{transform:translateX(calc(-50% - 7px))}}
 
 /* demos em abas */
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
@@ -283,6 +284,16 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
     <figure><img src="img/mata/hero.webp" alt="" width="1376" height="768" loading="lazy"><figcaption>Recanto da Mata</figcaption></figure>
     <figure><img src="img/demo/quarto-varanda.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Remanso do Rio</figcaption></figure>
     <figure><img src="img/mar/galeria-2.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Maré Mansa</figcaption></figure>
+  </div>
+  <div class="track" data-dir="-1">
+    <figure><img src="img/fazenda/hero.webp" alt="" width="1376" height="768" loading="lazy"><figcaption>Sítio dos Ipês</figcaption></figure>
+    <figure><img src="img/colonial/galeria-1.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Casarão Colonial</figcaption></figure>
+    <figure><img src="img/chapada/quarto-varanda.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Vale das Águas</figcaption></figure>
+    <figure><img src="img/mata/galeria-2.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Recanto da Mata</figcaption></figure>
+    <figure><img src="img/serra/galeria-1.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Cantinho da Serra</figcaption></figure>
+    <figure><img src="img/demo/hero.webp" alt="" width="1376" height="768" loading="lazy"><figcaption>Remanso do Rio</figcaption></figure>
+    <figure><img src="img/mar/quarto-3.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Maré Mansa</figcaption></figure>
+    <figure><img src="img/fazenda/quarto-varanda.webp" alt="" width="800" height="600" loading="lazy"><figcaption>Sítio dos Ipês</figcaption></figure>
   </div>
 </div>
 
@@ -472,6 +483,29 @@ function onScroll() {
 let ticking = false;
 addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { onScroll(); ticking = false; }); } }, { passive: true });
 onScroll();
+
+// faixa de fotos: 2 fileiras em sentidos opostos, seguem a direção da rolagem e podem ser arrastadas
+const rows = $$(".track").map(t => {
+  [...t.children].forEach(f => { const c = f.cloneNode(true); c.setAttribute("aria-hidden", "true"); t.append(c); });
+  return { t, x: 0, dir: +(t.dataset.dir || 1) };
+});
+let scrollDir = 1, boost = 0, lastY = scrollY, drag = null;
+addEventListener("scroll", () => { const d = scrollY - lastY; lastY = scrollY; if (d) { scrollDir = Math.sign(d); boost = Math.min(boost + Math.abs(d) * .04, 12); } }, { passive: true });
+const marquee = $(".marquee");
+marquee.addEventListener("pointerdown", e => { drag = { x: e.clientX }; marquee.classList.add("drag"); marquee.setPointerCapture(e.pointerId); });
+marquee.addEventListener("pointermove", e => { if (!drag) return; const dx = e.clientX - drag.x; drag.x = e.clientX; rows.forEach(r => r.x += dx * r.dir); });
+const stopDrag = () => { drag = null; marquee.classList.remove("drag"); };
+marquee.addEventListener("pointerup", stopDrag); marquee.addEventListener("pointercancel", stopDrag);
+(function tick() {
+  rows.forEach(r => {
+    const half = (r.t.scrollWidth + 14) / 2;  // 14 = gap entre o último original e o primeiro clone
+    if (!drag && !calm) r.x -= (.5 + boost) * scrollDir * r.dir;
+    if (half) r.x = ((r.x % half) - half) % half;  // mantém x em (-half, 0] para o loop não ter emenda
+    r.t.style.transform = `translate3d(${r.x}px,0,0)`;
+  });
+  boost *= .94;
+  requestAnimationFrame(tick);
+})();
 
 // demonstrações em abas
 const DEMOS = [
