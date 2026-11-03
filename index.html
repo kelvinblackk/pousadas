@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelvin · Sites para pousadas</title>
+<meta name="description" content="Sites, atendimento automático no WhatsApp e painel de gestão para pousadas e pequenos negócios de hospedagem.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: navegação fixa, abertura com colagem de fotos, demo em destaque, modelos com foto, automação (bloco escuro com conversa de exemplo), pacotes, processo e contato. */
+:root{
+  --bg:#F5F1E8; --surface:#FFFDF8; --ink:#17201B; --muted:#5E665F; --line:#E4DDCF;
+  --forest:#1F4D3A; --forest-ink:#F5F1E8; --sun:#D9822B; --sun-ink:#2A1606; --soft:#EBE4D5;
+  --dark:#14211A; --dark-2:#1C2D24; --dark-ink:#EEF1EC; --dark-muted:#A9B7AE;
+  --font-display:"Fraunces",Georgia,serif;
+  --font-body:"Manrope","Segoe UI",system-ui,sans-serif;
+  --radius:20px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1612; --surface:#161F1A; --ink:#EEF1EC; --muted:#A3AEA6; --line:#26322B;
+  --forest:#7FC4A1; --forest-ink:#0F1612; --sun:#F0A24A; --sun-ink:#2A1606; --soft:#1C2721;
+  --dark:#0B110E; --dark-2:#141D18; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0F1612; --surface:#161F1A; --ink:#EEF1EC; --muted:#A3AEA6; --line:#26322B;
+  --forest:#7FC4A1; --forest-ink:#0F1612; --sun:#F0A24A; --sun-ink:#2A1606; --soft:#1C2721;
+  --dark:#0B110E; --dark-2:#141D18; color-scheme:dark;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.08;letter-spacing:-.015em;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+img{display:block;max-width:100%;height:auto}
+:focus-visible{outline:3px solid var(--sun);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+section{padding:88px 0}
+@media (max-width:720px){section{padding:60px 0}}
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--sun)}
+.sec-head{display:grid;gap:12px;margin-bottom:36px;max-width:640px}
+.sec-head h2{font-size:clamp(1.9rem,4vw,2.8rem)}
+.sec-head p{color:var(--muted);font-size:1.06rem}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 22px;font:700 .95rem var(--font-body);text-decoration:none;border:1.5px solid var(--line);background:var(--surface);transition:transform .15s ease,filter .15s ease}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.btn-primary{background:var(--forest);color:var(--forest-ink);border-color:var(--forest)}
+.btn-sun{background:var(--sun);color:var(--sun-ink);border-color:var(--sun)}
+.btn svg{width:18px;height:18px;flex:none}
+
+/* navegação */
+.nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:66px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 1.2rem var(--font-display)}
+.brand i{width:34px;height:34px;border-radius:10px;background:var(--forest);color:var(--forest-ink);display:grid;place-items:center;font:700 1rem var(--font-display);font-style:normal}
+.nav nav{margin-left:auto;display:flex;gap:24px;font-size:.93rem;font-weight:600;color:var(--muted)}
+.nav nav a{text-decoration:none}.nav nav a:hover{color:var(--ink)}
+.nav .btn{padding:9px 16px;font-size:.88rem}
+@media (max-width:820px){.nav nav{display:none}.nav .btn{margin-left:auto}}
+
+/* abertura */
+.hero{padding:64px 0 80px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr;gap:40px}}
+.hero h1{font-size:clamp(2.4rem,5.6vw,4.2rem);margin:14px 0 20px}
+.hero h1 em{font-style:italic;color:var(--forest)}
+.hero .lead{font-size:1.14rem;color:var(--muted);max-width:52ch}
+.hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.points{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:30px;padding:0;list-style:none;font-size:.92rem;font-weight:600}
+.points li{display:flex;align-items:center;gap:8px}
+.points li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sun)}
+.collage{display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:14px;aspect-ratio:1.08}
+.collage img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius);box-shadow:0 18px 40px -18px rgba(20,33,26,.45)}
+.collage img:first-child{grid-row:span 2}
+
+/* destaque */
+.feature{display:grid;grid-template-columns:1.25fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:28px;overflow:hidden}
+@media (max-width:900px){.feature{grid-template-columns:1fr}}
+.shot{position:relative;background:var(--soft);padding:28px 0 0 28px;display:flex;align-items:flex-end;overflow:hidden}
+.browser{width:100%;border-radius:14px 0 0 0;overflow:hidden;box-shadow:0 24px 60px -20px rgba(20,33,26,.5);background:#fff}
+.browser .bar{display:flex;gap:6px;align-items:center;padding:10px 12px;background:#ECE7DC}
+.browser .bar span{width:10px;height:10px;border-radius:50%;background:#D3CCBD}
+.browser .bar b{margin-left:10px;font:600 .72rem var(--font-body);color:#6F6A5E;background:#F7F4EC;border-radius:6px;padding:3px 10px}
+.browser img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.feature .info{padding:40px;display:grid;gap:18px;align-content:center}
+@media (max-width:720px){.feature .info{padding:26px}.shot{padding:18px 0 0 18px}}
+.feature h3{font-size:clamp(1.7rem,3vw,2.2rem)}
+.feature .info>p{color:var(--muted)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.checks li{display:grid;grid-template-columns:22px 1fr;gap:10px;font-weight:500}
+.checks li::before{content:"";width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--forest) 16%,transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232F7A57' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/13px no-repeat}
+
+/* modelos */
+.models{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media (max-width:1000px){.models{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.models{grid-template-columns:1fr}}
+.model{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
+.model:hover{transform:translateY(-4px);box-shadow:0 22px 40px -24px rgba(20,33,26,.45)}
+.model .ph{overflow:hidden}
+.model img{width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .5s ease}
+.model:hover img{transform:scale(1.05)}
+.model div{padding:18px 18px 20px;display:grid;gap:6px;flex:1}
+.model small{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.model h3{font-size:1.25rem}
+.model p{color:var(--muted);font-size:.92rem}
+.model .go{margin-top:auto;padding-top:8px;font-weight:700;font-size:.9rem;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.model,.model img,.btn{transition:none}}
+
+/* automação */
+.dark{background:var(--dark);color:var(--dark-ink)}
+.dark .sec-head p{color:var(--dark-muted)}
+.auto{display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:start}
+@media (max-width:960px){.auto{grid-template-columns:1fr}}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:4px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.steps li:last-child{border-bottom:0}
+.steps li::before{counter-increment:s;content:counter(s);width:36px;height:36px;border-radius:12px;background:var(--dark-2);border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;font:600 1rem var(--font-display);color:var(--sun)}
+.steps b{display:block;font-size:1.05rem;margin-bottom:2px}
+.steps span{color:var(--dark-muted);font-size:.95rem}
+.phone{background:#0B141A;border-radius:30px;padding:12px;border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+.phone .head{display:flex;align-items:center;gap:10px;padding:10px 12px 12px;color:#E9EDEF;font-size:.9rem}
+.phone .head i{width:34px;height:34px;border-radius:50%;background:#2F7A57;display:grid;place-items:center;font:700 .9rem var(--font-display);font-style:normal}
+.phone .head small{display:block;color:#8696A0;font-size:.74rem}
+.chat{background:#0E1A14;border-radius:20px;padding:16px 12px;display:grid;gap:8px;font-size:.88rem;line-height:1.45}
+.msg{max-width:84%;padding:8px 11px;border-radius:12px;color:#E9EDEF}
+.msg.in{background:#202C33;justify-self:start;border-top-left-radius:4px}
+.msg.out{background:#005C4B;justify-self:end;border-top-right-radius:4px}
+.chat .note{justify-self:center;font-size:.72rem;color:#8696A0;background:#18242B;border-radius:8px;padding:3px 10px}
+.meta-badge{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:.85rem;font-weight:600;color:var(--dark-muted)}
+.meta-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#5BC48A;box-shadow:0 0 0 4px rgba(91,196,138,.18)}
+
+/* pacotes */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+@media (max-width:900px){.plans{grid-template-columns:1fr}}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;display:grid;gap:14px;align-content:start}
+.plan .tier{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.plan h3{font-size:1.5rem}
+.plan p{color:var(--muted);font-size:.95rem}
+.plan.top{background:var(--forest);border-color:var(--forest);color:var(--forest-ink)}
+.plan.top .tier{color:inherit;opacity:.75}
+.plan.top p,.plan.top .checks li{color:color-mix(in srgb,var(--forest-ink) 82%,transparent)}
+.plan.top .checks li::before{background-color:rgba(255,255,255,.14);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F0A24A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E")}
+.plan .checks{font-size:.93rem}
+.ribbon{justify-self:start;background:var(--sun);color:var(--sun-ink);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+
+/* processo */
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line)}
+@media (max-width:900px){.process{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.process{grid-template-columns:1fr}}
+.process div{padding:26px 22px 8px 0;display:grid;gap:8px;align-content:start}
+.process em{font:italic 600 2.4rem var(--font-display);color:var(--sun);line-height:1}
+.process b{font-size:1.08rem}
+.process span{color:var(--muted);font-size:.95rem}
+
+/* contato */
+.contact{background:var(--dark);color:var(--dark-ink);border-radius:32px;overflow:hidden;display:grid;grid-template-columns:1.2fr 1fr}
+@media (max-width:860px){.contact{grid-template-columns:1fr}}
+.contact .txt{padding:52px;display:grid;gap:18px;align-content:center}
+@media (max-width:720px){.contact .txt{padding:30px}}
+.contact h2{font-size:clamp(2rem,4vw,2.9rem)}
+.contact p{color:var(--dark-muted);max-width:46ch}
+.contact .num{font:600 1.15rem var(--font-body);letter-spacing:.02em}
+.contact img{width:100%;height:100%;min-height:260px;object-fit:cover}
+footer{padding:36px 0 44px;color:var(--muted);font-size:.88rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#inicio"><i aria-hidden="true">K</i>Kelvin</a>
+    <nav aria-label="Seções"><a href="#demo">Demonstração</a><a href="#modelos">Modelos</a><a href="#whatsapp">WhatsApp</a><a href="#pacotes">Pacotes</a><a href="#processo">Como trabalho</a></nav>
+    <a class="btn btn-primary" href="https://wa.me/5595981020209">Falar comigo</a>
+  </div>
+</header>
+
+<main id="inicio">
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Sites e atendimento para pousadas</span>
+      <h1>Sua pousada recebendo reservas <em>direto</em>, sem depender de plataforma.</h1>
+      <p class="lead">Faço o site, o atendimento automático no WhatsApp e o painel de gestão para pousadas pequenas venderem mais e responderem hóspedes na hora.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="demo/">Ver a demonstração</a>
+        <a class="btn" href="#modelos">Ver modelos de site</a>
+      </div>
+      <ul class="points"><li>Site rápido no celular</li><li>Reserva com sinal via Pix</li><li>WhatsApp oficial da Meta</li></ul>
+    </div>
+    <div class="collage">
+      <img src="img/demo/hero.webp" alt="Pousada de madeira à beira do rio ao pôr do sol" width="1376" height="768" fetchpriority="high">
+      <img src="img/demo/quarto-varanda.webp" alt="Suíte com rede, banheira e vista para o rio" width="800" height="600">
+      <img src="img/serra/hero.webp" alt="Chalés de madeira entre araucárias na serra" width="1376" height="768">
+    </div>
+  </div>
+</section>
+
+<section id="demo" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Projeto em destaque</span><h2>Uma pousada completa para você testar</h2><p>Navegue como hóspede e como dono: simule uma reserva, converse com o atendente virtual e abra o painel de gestão.</p></div>
+    <article class="feature">
+      <div class="shot">
+        <div class="browser">
+          <div class="bar" aria-hidden="true"><span></span><span></span><span></span><b>remansodorio.com.br</b></div>
+          <img src="img/demo/hero.webp" alt="Página inicial do site da Pousada Remanso do Rio" width="1376" height="768" loading="lazy">
+        </div>
+      </div>
+      <div class="info">
+        <span class="eyebrow">Site + atendimento · Hotelaria</span>
+        <h3>Pousada Remanso do Rio</h3>
+        <p>Modelo para pousadas pequenas venderem direto, sem pagar comissão para plataforma.</p>
+        <ul class="checks">
+          <li>Site com quartos, comodidades e localização</li>
+          <li>Simulador de reserva com total e sinal de 30%</li>
+          <li>Pedido pronto enviado ao WhatsApp da recepção</li>
+          <li>Atendente virtual 24h para dúvidas frequentes</li>
+          <li>Painel do dono: pedidos, sinais e ocupação</li>
+        </ul>
+        <a class="btn btn-sun" style="justify-self:start" href="demo/">Abrir demonstração</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section id="modelos" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Modelos de site</span><h2>Um estilo para cada tipo de pousada</h2><p>Versões de uma página para começar rápido: acomodações com preço, comodidades, galeria, localização e botão de WhatsApp.</p></div>
+    <div class="models">
+      <a class="model" style="--c:#B5562B" href="serra/"><span class="ph"><img src="img/serra/hero.webp" alt="Chalés de madeira entre araucárias" width="1376" height="768" loading="lazy"></span><div><small>Chalés na serra</small><h3>Cantinho da Serra</h3><p>Lareira, café colonial e trilhas.</p><span class="go">Ver modelo →</span></div></a>
+      <a class="model" style="--c:#0E8FB0" href="mar/"><span class="ph"><img src="img/mar/hero.webp" alt="Pousada de casas brancas diante do mar turquesa" width="1376" height="768" loading="lazy"></span><div><small>Pé na areia</small><h3>Maré Mansa</h3><p>Piscina, mar calmo e rede na varanda.</p><span class="go">Ver modelo →</span></div></a>
+      <a class="model" style="--c:#9B3A4C" href="colonial/"><span class="ph"><img src="img/colonial/hero.webp" alt="Casarão colonial amarelo em rua de pedra" width="1376" height="768" loading="lazy"></span><div><small>Centro histórico</small><h3>Casarão Colonial</h3><p>Casarão de 1890 com pátio interno.</p><span class="go">Ver modelo →</span></div></a>
+      <a class="model" style="--c:#3E7D32" href="mata/"><span class="ph"><img src="img/mata/hero.webp" alt="Bangalôs sobre palafitas à beira do igarapé" width="1376" height="768" loading="lazy"></span><div><small>Ecopousada</small><h3>Recanto da Mata</h3><p>Bangalôs na floresta e banho de igarapé.</p><span class="go">Ver modelo →</span></div></a>
+    </div>
+  </div>
+</section>
+
+<section id="whatsapp" class="dark">
+  <div class="wrap">
+    <div class="auto">
+      <div>
+        <div class="sec-head"><span class="eyebrow">Automação do WhatsApp</span><h2>O hóspede pergunta, a pousada responde na hora</h2><p>Robô feito com a API oficial da Meta, sem risco de bloqueio do número. Ele cuida do repetitivo e passa para você o que precisa de decisão.</p></div>
+        <ol class="steps">
+          <li><div><b>Resposta na hora, 24h</b><span>Preços, horários, pets, formas de pagamento e localização.</span></div></li>
+          <li><div><b>Pedido de reserva</b><span>Pergunta datas e hóspedes, calcula o valor e registra o pedido no painel.</span></div></li>
+          <li><div><b>Sinal via Pix</b><span>Envia a chave do sinal. Quando você marca "sinal recebido", a confirmação sai sozinha.</span></div></li>
+          <li><div><b>Lembretes e avaliação</b><span>Lembrete com a localização na véspera e pedido de avaliação no Google após a saída.</span></div></li>
+          <li><div><b>Passa para você</b><span>Se o hóspede pede um atendente ou o robô não sabe responder, a conversa vai para a recepção.</span></div></li>
+        </ol>
+      </div>
+      <div>
+        <div class="phone" role="img" aria-label="Exemplo de conversa entre hóspede e atendente virtual no WhatsApp">
+          <div class="head"><i aria-hidden="true">R</i><div>Remanso do Rio<small>conta comercial</small></div></div>
+          <div class="chat">
+            <span class="note">Conversa de exemplo</span>
+            <div class="msg in">Oi! Tem quarto pra 2 pessoas de 14 a 16 de novembro?</div>
+            <div class="msg out">Olá! Temos sim 😊 Standard Casal: 2 noites, R$ 360 com café da manhã. O sinal é de 30% (R$ 108) via Pix.</div>
+            <div class="msg in">Pode reservar!</div>
+            <div class="msg out">Pedido registrado. Segue a chave Pix do sinal. Assim que a recepção confirmar o pagamento, envio a confirmação por aqui.</div>
+          </div>
+        </div>
+        <span class="meta-badge">WhatsApp Cloud API oficial</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pacotes">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Pacotes</span><h2>Comece simples e evolua quando fizer sentido</h2></div>
+    <div class="plans">
+      <article class="plan">
+        <span class="tier">Básico</span><h3>Site + WhatsApp Business</h3>
+        <p>Para sair do zero rápido.</p>
+        <ul class="checks"><li>Site com fotos, quartos e preços</li><li>Saudação e mensagem de ausência</li><li>Respostas rápidas e etiquetas</li><li>Catálogo dos quartos no WhatsApp</li></ul>
+      </article>
+      <article class="plan top">
+        <span class="ribbon">Mais completo</span>
+        <span class="tier">Completo</span><h3>Site + robô + painel</h3>
+        <p>Atendimento automático e controle das reservas.</p>
+        <ul class="checks"><li>Tudo do Básico</li><li>Robô na API oficial da Meta</li><li>Pedidos de reserva e sinal via Pix</li><li>Painel com pedidos, sinais e ocupação</li></ul>
+      </article>
+      <article class="plan">
+        <span class="tier">Mensal</span><h3>Hospedagem e suporte</h3>
+        <p>Para não se preocupar com o site.</p>
+        <ul class="checks"><li>Site no ar com domínio próprio</li><li>Ajuste de preços, fotos e temporadas</li><li>Acompanhamento do atendimento</li></ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="processo" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Como eu trabalho</span><h2>Do primeiro papo ao site no ar</h2></div>
+    <div class="process">
+      <div><em>01</em><b>Conversa e diagnóstico</b><span>Entendo como a pousada atende hoje e onde perde clientes ou tempo.</span></div>
+      <div><em>02</em><b>Demonstração</b><span>Monto uma versão navegável para você aprovar antes de investir no projeto final.</span></div>
+      <div><em>03</em><b>Entrega e publicação</b><span>Site no ar com domínio próprio, Google Maps e Instagram conectados.</span></div>
+      <div><em>04</em><b>Suporte</b><span>Ajustes de preços, fotos e temporadas, e evolução das automações.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contato" style="padding-top:0">
+  <div class="wrap">
+    <div class="contact">
+      <div class="txt">
+        <span class="eyebrow">Contato</span>
+        <h2>Vamos montar o site da sua pousada?</h2>
+        <p>Me chame no WhatsApp. Monto a primeira versão com as fotos e os preços reais da sua pousada.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+          <a class="btn btn-sun" href="https://wa.me/5595981020209"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.4-.3Z"/></svg>Chamar no WhatsApp</a>
+          <span class="num">(95) 98102-0209</span>
+        </div>
+      </div>
+      <img src="img/mar/quarto-3.webp" alt="Suíte com varanda de frente para o mar" width="800" height="600" loading="lazy">
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><span>Kelvin · Desenvolvimento web e automação com IA</span><span>Pousadas dos modelos são fictícias, com fotos ilustrativas geradas por IA.</span></div></footer>
+</body>
+</html>

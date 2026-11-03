@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pousada Casarão Colonial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: site de uma página — hero com foto, sobre, quartos, comodidades, galeria, localização e WhatsApp fixo. */
+:root{--bg:#F7F3EE;--surface:#FFFFFF;--ink:#2A1A1F;--muted:#6B5A5F;--line:#E8DDD6;--accent:#7D2335;--accent-ink:#FFFFFF;
+--font-display:"Playfair Display",Georgia,serif;--font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.6}
+h1,h2,h3{font-family:var(--font-display);line-height:1.1;margin:0;text-wrap:balance}p{margin:0}a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.demo{background:var(--ink);color:var(--bg);text-align:center;font-size:.82rem;padding:7px 12px}
+header{display:flex;align-items:center;gap:16px;padding:16px 0}header b{font-family:var(--font-display);font-size:1.3rem}
+header nav{margin-left:auto;display:flex;gap:18px;font-size:.95rem;color:var(--muted)}header nav a{text-decoration:none}
+@media (max-width:720px){header nav{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--accent);color:var(--accent-ink);text-decoration:none;font-weight:700;border-radius:999px;padding:11px 20px;font-size:.95rem}
+.btn:hover{filter:brightness(1.08)}
+.hero{position:relative;border-radius:22px;overflow:hidden;min-height:440px;display:grid}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero .txt{position:relative;align-self:end;padding:36px;display:grid;gap:12px;max-width:560px}
+.hero.split .txt{background:var(--surface);margin:24px;border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.18)}
+.hero.center{place-items:center;text-align:center}.hero.center .txt{align-self:center;background:color-mix(in srgb,var(--surface) 90%,transparent);border-radius:18px;margin:24px;justify-items:center}
+.hero .btn{justify-self:start}.hero.center .btn{justify-self:center}.hero .k{color:var(--accent);font-weight:700;font-size:.9rem}.hero h1{font-size:clamp(2rem,5vw,3.2rem)}.hero p{color:var(--muted)}
+@media (max-width:720px){.hero{min-height:600px}.hero .txt,.hero.center .txt{align-self:end;margin:12px;padding:20px;gap:8px}.hero h1{font-size:1.75rem}}
+section{padding:56px 0}section h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:18px}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center}@media (max-width:760px){.about{grid-template-columns:1fr}}
+.about p{font-size:1.08rem;color:var(--muted);max-width:60ch}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px}.facts div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}.facts b{display:block;font-family:var(--font-display);font-size:1.4rem}.facts span{color:var(--muted);font-size:.9rem}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.room{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.room .pic img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}.rb{padding:18px;display:grid;gap:10px;flex:1;align-content:start}.rb p{color:var(--muted);font-size:.95rem}
+.pr{display:flex;gap:6px;align-items:baseline}.pr b{font-family:var(--font-display);font-size:1.5rem;font-variant-numeric:tabular-nums}.pr span{color:var(--muted);font-size:.85rem}
+.amen{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.amen li{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;font-weight:600}
+.gal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}@media (max-width:720px){.gal{grid-template-columns:1fr 1fr}}
+.gal figure{margin:0;border-radius:12px;overflow:hidden}.gal img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.loc{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between}
+.loc p{color:var(--muted)}
+footer{padding:30px 0 90px;color:var(--muted);font-size:.88rem;text-align:center}
+.wa{position:fixed;right:18px;bottom:18px;background:#25D366;color:#0B3B1E;font-weight:800;text-decoration:none;border-radius:999px;padding:14px 20px;box-shadow:0 10px 24px rgba(0,0,0,.25);display:flex;gap:8px;align-items:center}
+</style></head><body>
+<div class="demo">Modelo demonstrativo · pousada fictícia · fotos ilustrativas geradas por IA</div>
+<div class="wrap">
+<header><b>Casarão Colonial</b><nav><a href="#sobre">Sobre</a><a href="#quartos">Acomodações</a><a href="#galeria">Galeria</a><a href="#local">Como chegar</a></nav><a class="btn" href="#quartos">Reservar</a></header>
+<div class="hero split"><img src="../img/colonial/hero.webp" alt="Fachada do casarão colonial amarelo em rua de pedra com igreja barroca ao fundo" width="1600" height="900" fetchpriority="high"><div class="txt"><span class="k">Centro histórico · 7 suítes</span><h1>Um casarão de 1890 no coração do centro histórico</h1><p>Atendimento rápido pelo WhatsApp e café da manhã incluso.</p><a class="btn" href="#quartos">Ver acomodações</a></div></div>
+<section id="sobre" class="about"><div><h2>Sobre a pousada</h2><p>Casarão restaurado com pé-direito alto, piso de madeira original e pátio interno com jabuticabeiras. Caminhe até igrejas, museus e restaurantes sem precisar de carro.</p></div>
+<div class="facts"><div><b>14h</b><span>Check-in</span></div><div><b>12h</b><span>Check-out</span></div><div><b>Pix</b><span>Sinal de 30% para confirmar</span></div><div><b>3x</b><span>sem juros no cartão</span></div></div></section>
+<section id="quartos"><h2>Acomodações</h2><div class="rooms"><article class="room"><div class="pic"><img src="../img/colonial/quarto-1.webp" alt="Suíte Clássica: Cama king, móveis de época, banheiro reformado" width="800" height="600" loading="lazy"></div><div class="rb"><h3>Suíte Clássica</h3><p>Cama king, móveis de época, banheiro reformado</p><div class="pr"><b>R$ 260</b><span>/ noite com café</span></div>
+<a class="btn" href="https://wa.me/5595981020209?text=Olá!%20Quero%20saber%20a%20disponibilidade%20do%20Suíte%20Clássica">Consultar pelo WhatsApp</a></div></article><article class="room"><div class="pic"><img src="../img/colonial/quarto-2.webp" alt="Suíte Sacada: Sacada para a rua de pedra, pé-direito de 5 m" width="800" height="600" loading="lazy"></div><div class="rb"><h3>Suíte Sacada</h3><p>Sacada para a rua de pedra, pé-direito de 5 m</p><div class="pr"><b>R$ 320</b><span>/ noite com café</span></div>
+<a class="btn" href="https://wa.me/5595981020209?text=Olá!%20Quero%20saber%20a%20disponibilidade%20do%20Suíte%20Sacada">Consultar pelo WhatsApp</a></div></article><article class="room"><div class="pic"><img src="../img/colonial/quarto-3.webp" alt="Suíte Pátio: Acesso direto ao pátio interno" width="800" height="600" loading="lazy"></div><div class="rb"><h3>Suíte Pátio</h3><p>Acesso direto ao pátio interno</p><div class="pr"><b>R$ 300</b><span>/ noite com café</span></div>
+<a class="btn" href="https://wa.me/5595981020209?text=Olá!%20Quero%20saber%20a%20disponibilidade%20do%20Suíte%20Pátio">Consultar pelo WhatsApp</a></div></article></div></section>
+<section><h2>Comodidades</h2><ul class="amen"><li>Café no pátio</li><li>Roteiro histórico</li><li>Wi-Fi</li><li>Ar-condicionado</li><li>Bicicletas</li><li>Recepção 24h</li></ul></section>
+<section id="galeria"><h2>Galeria</h2><div class="gal"><figure><img src="../img/colonial/galeria-1.webp" alt="Mesa de café no pátio interno sob a jabuticabeira" width="800" height="600" loading="lazy"></figure><figure><img src="../img/colonial/galeria-2.webp" alt="Rua de pedra com casarões coloridos e igreja barroca" width="800" height="600" loading="lazy"></figure><figure><img src="../img/colonial/galeria-3.webp" alt="Corredor interno com piso de madeira original e janelas em arco" width="800" height="600" loading="lazy"></figure><figure><img src="../img/colonial/galeria-4.webp" alt="Bicicletas encostadas em casarão colorido" width="800" height="600" loading="lazy"></figure></div></section>
+<section id="local"><div class="loc"><div><h2 style="margin-bottom:6px">Como chegar</h2><p>Rua do Rosário, 45 · Centro Histórico (endereço ilustrativo)</p></div><a class="btn" href="https://wa.me/5595981020209">Pedir localização no WhatsApp</a></div></section>
+</div>
+<footer>Pousada Casarão Colonial · modelo de site demonstrativo desenvolvido por Kelvin</footer>
+<a class="wa" href="https://wa.me/5595981020209">WhatsApp</a>
+</body></html>
