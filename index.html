@@ -180,20 +180,23 @@ section{padding:96px 0;position:relative}
 .phone .head small{display:block;color:#8696A0;font-size:.74rem}
 .chat{background:#0E1A14;border-radius:22px;padding:14px 12px;height:440px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2A3A33 transparent;display:flex;flex-direction:column;gap:8px;font-size:.88rem;line-height:1.45}
 .chat::before{content:"";flex:1 0 0}  /* empurra as mensagens para baixo sem impedir a rolagem */
-.cap{display:none}
-/* celular: a seção fica presa na tela e a conversa avança com a rolagem */
-.auto.scrolly{display:block;height:420vh}
-.scrolly .steps,.scrolly .meta-badge{display:none}
-.scrolly .phone-wrap{position:sticky;top:78px}
-.scrolly .chat{height:min(46vh,400px)}
-.scrolly .cap{display:grid;gap:4px;margin-top:14px;min-height:118px}
-.cap .dots{display:flex;gap:6px;margin-bottom:6px}
-.cap .dots i{height:4px;flex:1;border-radius:4px;background:rgba(255,255,255,.14);transition:background .3s}
-.cap .dots i.on{background:var(--sun)}
-.cap b{font-size:1.1rem}
-.cap b em{font-style:normal;color:var(--sun);margin-right:6px}
-.cap span{color:var(--dark-muted);font-size:.95rem}
-.cap.swap b,.cap.swap span{animation:pop .35s cubic-bezier(.2,.8,.2,1)}
+.swipe-hint,.sdots{display:none}
+/* celular: conversa em cima e passos em carrossel que se desliza com o dedo */
+@media (max-width:960px){
+  .phone-wrap{order:-1}
+  .auto{gap:16px}
+  .chat{height:min(36vh,330px)}
+  .phone .head{padding:6px 10px 10px}
+  .steps{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -20px;padding:4px 20px 6px;scroll-padding:0 20px}
+  .steps::-webkit-scrollbar{display:none}
+  .steps li{flex:0 0 82%;scroll-snap-align:start;grid-template-columns:40px 1fr;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:var(--dark-2);opacity:.55;transition:opacity .3s,border-color .3s}
+  .steps li:last-child{border-bottom:1px solid rgba(255,255,255,.1)}
+  .steps li.cur{opacity:1;border-color:var(--sun)}
+  .swipe-hint{display:block;font-size:.85rem;color:var(--dark-muted);margin:0}
+  .sdots{display:flex;justify-content:center;gap:6px}
+  .sdots i{width:7px;height:7px;border-radius:999px;background:rgba(255,255,255,.2);transition:width .3s,background .3s}
+  .sdots i.cur{width:22px;background:var(--sun)}
+}
 .msg,.note{display:none}
 .msg.show,.note.show{display:block;animation:pop .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
@@ -204,6 +207,7 @@ section{padding:96px 0;position:relative}
 .note.tag{color:#7FD1A8}
 .meta-badge{display:inline-flex;align-items:center;gap:8px;margin-top:20px;font-size:.85rem;font-weight:600;color:var(--dark-muted)}
 .meta-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#5BC48A;box-shadow:0 0 0 4px rgba(91,196,138,.18)}
+@media (max-width:960px){.meta-badge{display:none}}
 
 /* pacotes */
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
@@ -354,8 +358,9 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 
 <section id="whatsapp" class="dark">
   <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">Automação do WhatsApp</span><h2 class="fill">O hóspede pergunta, a pousada responde na hora</h2><p class="reveal">Robô feito com a API oficial da Meta, sem risco de bloqueio do número. Role a página e veja a conversa avançar.</p></div>
+    <div class="sec-head"><span class="eyebrow">Automação do WhatsApp</span><h2 class="fill">O hóspede pergunta, a pousada responde na hora</h2><p class="reveal">Robô feito com a API oficial da Meta, sem risco de bloqueio do número. Veja a conversa avançar passo a passo.</p></div>
     <div class="auto">
+      <p class="swipe-hint">Deslize os passos para o lado →</p>
       <ol class="steps" id="steps">
         <li data-step="1"><div><b>Resposta na hora, 24h</b><span>Preços, horários, pets, formas de pagamento e localização.</span></div></li>
         <li data-step="2"><div><b>Pedido de reserva</b><span>Pergunta datas e hóspedes, calcula o valor e registra o pedido no painel.</span></div></li>
@@ -363,6 +368,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
         <li data-step="4"><div><b>Lembretes e avaliação</b><span>Lembrete com a localização na véspera e pedido de avaliação no Google após a saída.</span></div></li>
         <li data-step="5"><div><b>Passa para você</b><span>Se o hóspede pede um atendente ou o robô não sabe responder, a conversa vai para a recepção.</span></div></li>
       </ol>
+      <div class="sdots" id="sdots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
       <div class="phone-wrap">
         <div class="phone" role="img" aria-label="Exemplo de conversa entre hóspede e atendente virtual no WhatsApp">
           <div class="head"><i aria-hidden="true">R</i><div>Remanso do Rio<small>conta comercial · conversa de exemplo</small></div></div>
@@ -381,7 +387,6 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
             <div class="note tag" data-s="5">Conversa passada para a recepção</div>
           </div>
         </div>
-        <div class="cap" id="cap" aria-live="polite"><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b></b><span></span></div>
         <span class="meta-badge">WhatsApp Cloud API oficial</span>
       </div>
     </div>
@@ -560,34 +565,30 @@ if (!calm && matchMedia("(hover: hover)").matches) $$(".model").forEach(c => {
 
 // conversa do WhatsApp que avança
 const parts = $$("#chat [data-s]"), stepEls = $$("#steps li");
-const chat = $("#chat"), cap = $("#cap"), autoSec = $(".auto");
+const chat = $("#chat"), dots = $$("#sdots i"), mobile = matchMedia("(max-width: 960px)").matches;
 let step = 0;
 function upTo(n) {
   if (n === step) return; step = n;
   parts.forEach(p => p.classList.toggle("show", +p.dataset.s <= n));
-  stepEls.forEach(s => s.classList.toggle("on", +s.dataset.step <= n));
+  stepEls.forEach(s => { s.classList.toggle("on", +s.dataset.step <= n); s.classList.toggle("cur", +s.dataset.step === n); });
+  dots.forEach((d, i) => d.classList.toggle("cur", i === n - 1));
   chat.scrollTo({ top: chat.scrollHeight, behavior: calm ? "auto" : "smooth" });
-  const li = stepEls[n - 1];
-  cap.querySelector("b").innerHTML = `<em>${n}/5</em>` + li.querySelector("b").textContent;
-  cap.querySelector("span:last-child").textContent = li.querySelector("span").textContent;
-  cap.querySelectorAll(".dots i").forEach((d, i) => d.classList.toggle("on", i < n));
-  cap.classList.remove("swap"); void cap.offsetWidth; cap.classList.add("swap");
 }
-if (calm) upTo(5);
-else if (matchMedia("(min-width: 961px)").matches) {
-  upTo(1);
+upTo(calm && !mobile ? 5 : 1);
+const stepsBox = $("#steps");
+if (mobile) {
+  // celular: o cartão encostado à esquerda do carrossel manda
+  stepsBox.addEventListener("scroll", () => {
+    const w = stepEls[1].offsetLeft - stepEls[0].offsetLeft;
+    const end = stepsBox.scrollLeft + stepsBox.clientWidth >= stepsBox.scrollWidth - 4;
+    upTo(end ? 5 : Math.min(5, 1 + Math.round(stepsBox.scrollLeft / w)));
+  }, { passive: true });
+} else if (!calm) {
+  // computador: o passo no meio da tela manda
   const so = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) upTo(+e.target.dataset.step); }), { rootMargin: "-45% 0px -45% 0px" });
   stepEls.forEach(s => so.observe(s));
-} else {
-  // celular: o passo sai da posição da rolagem dentro da seção presa na tela
-  autoSec.classList.add("scrolly");
-  upTo(1);
-  const follow = () => {
-    const r = autoSec.getBoundingClientRect(), p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
-    upTo(Math.min(5, 1 + Math.floor(p * 5)));
-  };
-  addEventListener("scroll", follow, { passive: true });
 }
+stepEls.forEach(s => s.addEventListener("click", () => mobile && s.scrollIntoView({ behavior: calm ? "auto" : "smooth", inline: "start", block: "nearest" })));
 </script>
 </body>
 </html>
