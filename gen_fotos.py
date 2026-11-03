@@ -28,6 +28,26 @@ SITES = {
                            "para varanda com rede colorida e vista para o rio e a mata, banheira visível, "
                            "luz dourada do fim de tarde, madeira e tons verdes."),
     },
+    "chapada": {
+        "hero": ("16:9", "Pousada de chalés de pedra e madeira na Chapada brasileira, cerrado com paredões de arenito avermelhado "
+                 "ao fundo, cachoeira alta caindo num poço verde-azulado perto dos chalés, céu azul de fim de tarde, luz dourada."),
+        "quarto-casal": ("4:3", "Chalé casal de pedra e madeira na chapada, cama de casal com roupa de cama branca e manta azul-petróleo, "
+                         "parede de pedra aparente, janela grande com vista do cerrado e paredões, luz da manhã."),
+        "quarto-familia": ("4:3", "Chalé família na chapada, cama de casal e duas camas de solteiro, paredes de pedra e madeira clara, "
+                           "tapete de fibra, ventilador de teto, porta aberta para varanda com vista do cerrado."),
+        "quarto-varanda": ("4:3", "Chalé mirante na chapada, cama de casal virada para porta de vidro aberta para varanda com "
+                           "hidromassagem externa e vista panorâmica de cânion e cachoeira ao longe, pôr do sol."),
+    },
+    "fazenda": {
+        "hero": ("16:9", "Pousada rural numa fazenda brasileira, casarão de fazenda branco com janelas azuis e varanda comprida, "
+                 "ipês amarelos floridos, gramado, cavalos pastando, lago calmo ao lado, manhã ensolarada com céu azul."),
+        "quarto-casal": ("4:3", "Quarto casal de pousada de fazenda, cama de ferro antiga com colcha de crochê branca, piso de ladrilho "
+                         "hidráulico, janela de madeira azul aberta para o jardim com ipê amarelo, móveis rústicos."),
+        "quarto-familia": ("4:3", "Quarto família em casarão de fazenda, cama de casal e duas camas de solteiro de madeira, colchas coloridas "
+                           "de retalho, piso de madeira, pé-direito alto com forro de madeira, janelas abertas para o pasto."),
+        "quarto-varanda": ("4:3", "Suíte com varanda de frente para o lago numa fazenda, cama de casal com dossel leve, banheira de imersão "
+                           "perto da janela, varanda com cadeiras de balanço e vista do lago e dos ipês, fim de tarde."),
+    },
     "serra": {
         "hero": ("16:9", "Chalés de madeira de uma pousada na serra do sul do Brasil entre araucárias, montanhas azuladas "
                  "ao fundo, fumaça saindo da chaminé, fim de tarde com névoa leve, gramado verde, clima frio e aconchegante."),
@@ -133,6 +153,9 @@ def main(site):
             orig.write_bytes(gerar(prompt, aspect, k))
         tam, q = webp(orig.read_bytes(), pasta / f"{nome}.webp", 1600 if nome == "hero" else 800)
         print(f"{site}/{nome}.webp  {tam // 1024} KB  q={q}")
+        if nome.startswith("galeria"):  # versão maior para a tela cheia
+            tam, q = webp(orig.read_bytes(), pasta / f"{nome}-full.webp", 1200, 250_000)
+            print(f"{site}/{nome}-full.webp  {tam // 1024} KB  q={q}")
 
 
 if __name__ == "__main__":

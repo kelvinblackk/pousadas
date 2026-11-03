@@ -49,6 +49,29 @@ SITES = [
        where="Ramal do Igarapé, km 3 · acesso por estrada de terra (endereço ilustrativo)"),
 ]
 
+LIGHTBOX = """<dialog class="lb" aria-label="Foto em tela cheia">
+<img alt=""><p></p>
+<button class="x" aria-label="Fechar">×</button><button class="pv" aria-label="Foto anterior">‹</button><button class="nx" aria-label="Próxima foto">›</button>
+</dialog>
+<script>
+(() => {
+  const d = document.querySelector(".lb"), img = d.querySelector("img"), cap = d.querySelector("p");
+  const links = [...document.querySelectorAll(".gal a")];
+  let i = 0, x0 = null;
+  const show = n => { i = (n + links.length) % links.length; const a = links[i].querySelector("img");
+    img.src = links[i].href; img.alt = a.alt; cap.textContent = a.alt + " · " + (i + 1) + "/" + links.length; };
+  links.forEach((a, n) => a.addEventListener("click", e => { e.preventDefault(); show(n); d.showModal(); }));
+  d.querySelector(".x").onclick = () => d.close();
+  d.querySelector(".pv").onclick = () => show(i - 1);
+  d.querySelector(".nx").onclick = () => show(i + 1);
+  d.addEventListener("click", e => { if (e.target === d) d.close(); });
+  d.addEventListener("keydown", e => { if (e.key === "ArrowLeft") show(i - 1); if (e.key === "ArrowRight") show(i + 1); });
+  d.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  d.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(i + (dx < 0 ? 1 : -1)); x0 = null; });
+})();
+</script>"""
+
 def brl(v): return f"R$ {v}"
 
 def build(s):
@@ -57,7 +80,7 @@ def build(s):
     rooms = "".join(f'''<article class="room"><div class="pic"><img src="../img/{s["slug"]}/quarto-{i+1}.webp" alt="{n}: {d}" width="800" height="600" loading="lazy"></div><div class="rb"><h3>{n}</h3><p>{d}</p><div class="pr"><b>{brl(p)}</b><span>/ noite com café</span></div>
 <a class="btn" href="https://wa.me/5595981020209?text={('Olá! Quero saber a disponibilidade do ' + n).replace(' ', '%20')}">Consultar pelo WhatsApp</a></div></article>''' for i, (n, p, d) in enumerate(s["rooms"]))
     amen = "".join(f"<li>{a}</li>" for a in s["amen"])
-    gal = "".join(f'<figure><img src="../img/{s["slug"]}/galeria-{i+1}.webp" alt="{a}" width="800" height="600" loading="lazy"></figure>' for i, a in enumerate(s["gal"]))
+    gal = "".join(f'<figure><a href="../img/{s["slug"]}/galeria-{i+1}-full.webp"><img src="../img/{s["slug"]}/galeria-{i+1}.webp" alt="{a}" width="800" height="600" loading="lazy"></a></figure>' for i, a in enumerate(s["gal"]))
     hero_cls = "hero split" if s["layout"] == "split" else "hero center"
     return f'''<!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -97,6 +120,15 @@ section{{padding:56px 0}}section h2{{font-size:clamp(1.6rem,3vw,2.2rem);margin-b
 .amen li{{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;font-weight:600}}
 .gal{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}}@media (max-width:720px){{.gal{{grid-template-columns:1fr 1fr}}}}
 .gal figure{{margin:0;border-radius:12px;overflow:hidden}}.gal img{{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}}
+.gal a{{display:block;cursor:zoom-in}}.gal img{{transition:transform .4s ease}}.gal a:hover img{{transform:scale(1.04)}}
+.lb{{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:rgba(8,10,9,.94);color:#fff}}
+.lb[open]{{display:grid;place-items:center}}.lb::backdrop{{background:rgba(0,0,0,.6)}}
+.lb img{{max-width:100vw;max-height:calc(100dvh - 90px);object-fit:contain}}
+.lb p{{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:.9rem;opacity:.85;padding:0 64px}}
+.lb button{{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:999px;width:48px;height:48px;font-size:1.8rem;line-height:1;cursor:pointer}}
+.lb button:hover{{background:rgba(255,255,255,.25)}}.lb .x{{top:14px;right:14px}}.lb .pv{{left:14px;top:50%;translate:0 -50%}}.lb .nx{{right:14px;top:50%;translate:0 -50%}}
+@media (max-width:720px){{.lb .pv,.lb .nx{{top:auto;bottom:6px;translate:none}}}}
+@media (prefers-reduced-motion:reduce){{.gal img{{transition:none}}}}
 .loc{{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between}}
 .loc p{{color:var(--muted)}}
 footer{{padding:30px 0 90px;color:var(--muted);font-size:.88rem;text-align:center}}
@@ -115,6 +147,7 @@ footer{{padding:30px 0 90px;color:var(--muted);font-size:.88rem;text-align:cente
 </div>
 <footer>{s["title"]} · modelo de site demonstrativo desenvolvido por Kelvin</footer>
 <a class="wa" href="https://wa.me/5595981020209">WhatsApp</a>
+{LIGHTBOX}
 </body></html>'''
 
 import os

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pousada Sítio dos Ipês</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: site de pousada em uma coluna larga; seções alternam fundo claro e verde-floresta; chat flutuante no canto. */
+:root{
+  --bg:#F8F3EA;
+  --surface:#FFFFFF;
+  --ink:#2A1C14;
+  --muted:#6E5B4E;
+  --line:#E8DCCB;
+  --forest:#3B2418;
+  --forest-2:#6B3F28;
+  --sun:#E8B04A;
+  --sun-ink:#3A2604;
+  --ok:#2F8A57; --warn:#C77A10; --info:#2E6FA8;
+  --font-display:"Fraunces", "Segoe UI", system-ui, sans-serif;
+  --font-body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --radius:14px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#17110D; --surface:#211912; --ink:#F1E9E1; --muted:#B3A396; --line:#382A20;
+    --forest:#2A1A11; --forest-2:#55321F; --sun:#EDBB5C; --sun-ink:#2A1B02;
+    --ok:#5BC48A; --warn:#E7A23D; --info:#6AA8DE;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#17110D; --surface:#211912; --ink:#F1E9E1; --muted:#B3A396; --line:#382A20;
+  --forest:#2A1A11; --forest-2:#55321F; --sun:#EDBB5C; --sun-ink:#2A1B02;
+  --ok:#5BC48A; --warn:#E7A23D; --info:#6AA8DE;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:var(--font-display);line-height:1.1;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.num{font-variant-numeric:tabular-nums}
+
+.demo-bar{background:var(--sun);color:var(--sun-ink);font-size:.85rem;font-weight:600;text-align:center;padding:8px 16px}
+header.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:1.15rem;text-decoration:none}
+.brand svg{flex:none}
+.nav nav{display:flex;gap:18px;margin-left:auto;font-weight:500;font-size:.95rem}
+.nav nav a{text-decoration:none;color:var(--muted)}
+.nav nav a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 20px;font:600 .95rem var(--font-body);cursor:pointer;text-decoration:none}
+.btn-sun{background:var(--sun);color:var(--sun-ink)}
+.btn-sun:hover{filter:brightness(1.05)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-dark{background:var(--forest);color:#fff}
+@media (max-width:820px){.nav nav{display:none}.nav .btn{margin-left:auto}}
+
+/* Hero */
+.hero{position:relative;background:var(--forest);color:#F3F6F1;overflow:hidden}
+.hero img.scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(44,26,17,.88) 0%,rgba(44,26,17,.55) 55%,rgba(44,26,17,.2) 100%)}
+.hero .wrap{position:relative;z-index:2;padding:72px 20px 40px;display:grid;gap:28px}
+.hero .kicker{font-weight:600;color:var(--sun);font-size:.95rem}
+.hero h1{font-size:clamp(2.3rem,6vw,4rem);font-weight:800;max-width:14ch;letter-spacing:-.02em}
+.hero p.lead{max-width:48ch;font-size:1.1rem;color:#D8E3DB}
+.quick{background:var(--surface);color:var(--ink);border-radius:var(--radius);padding:14px;display:grid;grid-template-columns:repeat(3,1fr) auto;gap:12px;align-items:end;box-shadow:0 18px 40px rgba(0,0,0,.25);max-width:820px}
+.quick label,.field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+input,select{width:100%;font:500 .95rem var(--font-body);color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+input:focus,select:focus{border-color:var(--forest-2);outline:none}
+@media (max-width:720px){.quick{grid-template-columns:1fr 1fr}.quick .btn{grid-column:1/-1}}
+.hero-facts{display:flex;flex-wrap:wrap;gap:10px 26px;color:#CFE0D4;font-size:.92rem}
+.hero-facts b{color:#fff}
+
+section{padding:72px 0}
+.sec-head{display:grid;gap:8px;margin-bottom:28px;max-width:62ch}
+.sec-head p{color:var(--muted)}
+
+/* Rooms */
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.room{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+.room .pic{aspect-ratio:16/10;display:block;width:100%;height:auto;object-fit:cover}
+.room .body{padding:18px;display:grid;gap:10px;flex:1}
+.room .meta{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.room .price{display:flex;align-items:baseline;gap:6px;margin-top:auto}
+.room .price b{font-family:var(--font-display);font-size:1.6rem}
+.room .price span{color:var(--muted);font-size:.9rem}
+.room .actions{display:flex;gap:8px}
+
+/* Booking simulator */
+.band{background:var(--surface);border-block:1px solid var(--line)}
+.booking{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:start}
+@media (max-width:860px){.booking{grid-template-columns:1fr}}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-grid .full{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:10px;font-weight:500}
+.check input{width:20px;height:20px;accent-color:var(--forest-2)}
+.summary{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:12px}
+.summary .row{display:flex;justify-content:space-between;gap:12px;color:var(--muted)}
+.summary .row span:last-child{color:var(--ink);font-weight:600}
+.summary .total{border-top:1px dashed var(--line);padding-top:12px;display:flex;justify-content:space-between;align-items:baseline}
+.summary .total b{font-family:var(--font-display);font-size:1.9rem}
+.note{font-size:.85rem;color:var(--muted)}
+.err{color:#C0392B;font-weight:600;font-size:.9rem}
+.wa-preview{white-space:pre-wrap;font-size:.85rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--muted)}
+.toast{background:color-mix(in srgb,var(--ok) 14%,var(--surface));border:1px solid var(--ok);color:var(--ink);padding:10px 12px;border-radius:10px;font-size:.9rem}
+
+/* Amenities */
+.amen{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.amen div{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line)}
+.amen svg{flex:none;color:var(--forest-2)}
+.amen b{display:block}
+.amen span{color:var(--muted);font-size:.9rem}
+
+/* Atendimento */
+.dark{background:var(--forest);color:#EAF1EC}
+.dark .sec-head p{color:#B9CCBF}
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;counter-reset:s}
+.flow div{background:var(--forest-2);border-radius:var(--radius);padding:18px;display:grid;gap:6px}
+.flow div::before{counter-increment:s;content:counter(s);font:800 1.4rem var(--font-display);color:var(--sun)}
+.flow span{color:#C3D5C9;font-size:.92rem}
+
+/* FAQ */
+.faq{display:grid;gap:10px;max-width:820px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px}
+summary{cursor:pointer;font-weight:600}
+details p{margin-top:8px;color:var(--muted)}
+
+/* Location */
+.loc{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+@media (max-width:820px){.loc{grid-template-columns:1fr}}
+.map{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.loc ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}
+.loc li{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px}
+.loc li span:last-child{color:var(--muted)}
+
+/* Painel */
+.panel-shell{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.panel-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--bg)}
+.panel-top b{font-family:var(--font-display)}
+.panel-top .tag{margin-left:auto}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+@media (max-width:720px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{background:var(--surface);padding:16px 18px}
+.tile span{display:block;font-size:.8rem;color:var(--muted);font-weight:600}
+.tile b{font:800 1.7rem var(--font-display)}
+.tile small{color:var(--muted)}
+.panel-body{display:grid;grid-template-columns:1.6fr 1fr;gap:0}
+@media (max-width:900px){.panel-body{grid-template-columns:1fr}}
+.panel-body > div{padding:18px;min-width:0}
+.panel-body > div + div{border-left:1px solid var(--line)}
+@media (max-width:900px){.panel-body > div + div{border-left:0;border-top:1px solid var(--line)}}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:560px}
+th{text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.new td{background:color-mix(in srgb,var(--sun) 12%,transparent)}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px}
+.pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.pill.info{background:color-mix(in srgb,var(--info) 16%,transparent);color:var(--info)}
+.mini-btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 10px;font:600 .8rem var(--font-body);cursor:pointer}
+.occ{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.occ div{aspect-ratio:1;border-radius:6px;font-size:.72rem;display:grid;place-items:center;font-weight:600}
+.occ .h{background:none;color:var(--muted);aspect-ratio:auto}
+.legend{display:flex;gap:12px;font-size:.78rem;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+
+/* Projeto */
+.deliver{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.deliver div{border-left:4px solid var(--sun);background:var(--surface);padding:16px 18px;border-radius:0 12px 12px 0;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.deliver b{display:block;margin-bottom:4px}
+.deliver span{color:var(--muted);font-size:.92rem}
+
+footer{background:var(--forest);color:#CFE0D4;padding:40px 0;font-size:.92rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between}
+footer b{color:#fff;font-family:var(--font-display)}
+
+/* Chat */
+.chat-fab{position:fixed;right:18px;bottom:18px;z-index:40;width:60px;height:60px;border-radius:50%;background:var(--sun);color:var(--sun-ink);border:0;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.25);display:grid;place-items:center}
+.chat-fab .dot{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;background:var(--ok);border:2px solid var(--sun)}
+.chat{position:fixed;right:18px;bottom:90px;z-index:41;width:min(370px,calc(100vw - 36px));height:min(540px,calc(100vh - 120px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.3);display:none;flex-direction:column;overflow:hidden}
+.chat.open{display:flex}
+.chat-head{background:var(--forest);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.chat-head small{display:block;color:#BFD3C5;font-size:.78rem}
+.chat-head button{margin-left:auto;background:none;border:0;color:#fff;font-size:1.3rem;cursor:pointer}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.msg{max-width:85%;padding:9px 12px;border-radius:14px;font-size:.92rem;white-space:pre-line}
+.msg.bot{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.me{background:var(--forest-2);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.quick-replies{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-top:1px solid var(--line)}
+.quick-replies button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:5px 11px;font:600 .8rem var(--font-body);cursor:pointer}
+.chat form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.chat form input{flex:1}
+</style>
+</head>
+<body>
+
+<div class="demo-bar">Projeto demonstrativo · pousada fictícia criada para apresentar site + estrutura de atendimento</div>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#inicio">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--forest)"/><path d="M6 21c3-2 6-2 10 0s7 2 10 0" stroke="var(--sun)" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M16 7l6 8H10z" fill="#fff"/></svg>
+      Sítio dos Ipês
+    </a>
+    <nav aria-label="Seções">
+      <a href="#quartos">Quartos</a>
+      <a href="#reservar">Reservar</a>
+      <a href="#atendimento">Atendimento</a>
+      <a href="#localizacao">Localização</a>
+      <a href="#painel">Painel do dono</a>
+    </nav>
+    <a class="btn btn-sun" href="#reservar">Reservar</a>
+  </div>
+</header>
+
+<section class="hero" id="inicio" style="padding:0">
+  <img class="scene" src="../img/fazenda/hero.webp" alt="Casarão de fazenda branco com janelas azuis, ipês amarelos floridos, cavalos e lago" width="1600" height="900" fetchpriority="high">
+  <div class="wrap">
+    <p class="kicker">Pousada rural · 8 quartos</p>
+    <h1>Café da roça, cavalos e silêncio de fazenda</h1>
+    <p class="lead">Casarão restaurado entre ipês, com lago, cavalgada e comida feita no fogão a lenha. Reserve em menos de 2 minutos.</p>
+    <form class="quick" id="quickForm">
+      <div><label for="qIn">Check-in</label><input type="date" id="qIn" required></div>
+      <div><label for="qOut">Check-out</label><input type="date" id="qOut" required></div>
+      <div><label for="qGuests">Hóspedes</label>
+        <select id="qGuests"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <button class="btn btn-sun" type="submit">Ver valores</button>
+    </form>
+    <div class="hero-facts"><span><b>Check-in</b> a partir das 14h</span><span><b>Café</b> 7h às 10h</span><span><b>Cavalgada</b> inclusa</span><span><b>Estacionamento</b> grátis</span></div>
+  </div>
+</section>
+
+<section id="quartos">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Quartos</h2>
+      <p>Valores por diária, com café da manhã incluso. Hóspede adicional acima da capacidade base: R$ 50 por noite.</p>
+    </div>
+    <div class="rooms" id="rooms"></div>
+  </div>
+</section>
+
+<section class="band" id="reservar">
+  <div class="wrap booking">
+    <div>
+      <div class="sec-head">
+        <h2>Simule e peça sua reserva</h2>
+        <p>Você vê o valor na hora e o pedido chega pronto no WhatsApp da recepção. A reserva é confirmada com sinal de 30% via Pix.</p>
+      </div>
+      <form id="bookForm" class="form-grid" novalidate>
+        <div class="full field"><label for="bRoom">Quarto</label><select id="bRoom"></select></div>
+        <div class="field"><label for="bIn">Check-in</label><input type="date" id="bIn"></div>
+        <div class="field"><label for="bOut">Check-out</label><input type="date" id="bOut"></div>
+        <div class="field"><label for="bGuests">Hóspedes</label>
+          <select id="bGuests"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="field"><label for="bName">Seu nome</label><input id="bName" placeholder="Ex.: Ana Souza" autocomplete="name"></div>
+        <label class="check full"><input type="checkbox" id="bPet"> Vou levar pet de pequeno porte (+R$ 30 por estadia)</label>
+        <label class="check full"><input type="checkbox" id="bTransfer"> Quero transfer da rodoviária (R$ 40)</label>
+      </form>
+    </div>
+    <aside class="summary" aria-live="polite">
+      <h3 id="sRoom">—</h3>
+      <div class="row"><span>Período</span><span id="sDates" class="num">—</span></div>
+      <div class="row"><span>Diárias</span><span id="sNights" class="num">—</span></div>
+      <div class="row"><span>Hóspede adicional</span><span id="sExtra" class="num">—</span></div>
+      <div class="row"><span>Extras</span><span id="sAddons" class="num">—</span></div>
+      <div class="total"><span>Total</span><b id="sTotal" class="num">R$ 0</b></div>
+      <div class="row"><span>Sinal para confirmar (30%)</span><span id="sDeposit" class="num">—</span></div>
+      <p id="sErr" class="err" hidden></p>
+      <button class="btn btn-dark" id="sendBtn" type="button">Enviar pedido de reserva</button>
+      <div id="sentBox" hidden class="toast"></div>
+      <p class="note">Mensagem que a recepção recebe:</p>
+      <div class="wa-preview" id="waPreview"></div>
+    </aside>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head"><h2>Comodidades</h2></div>
+    <div class="amen">
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11h18v4a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 11V6a3 3 0 0 1 6 0"/></svg><p><b>Café da roça</b><span>Queijo da casa, pão caseiro, fogão a lenha</span></p></div>
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1"/></svg><p><b>Wi-Fi 300 Mb</b><span>Sinal em todos os quartos e áreas comuns</span></p></div>
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="10" rx="2"/><path d="M7 20v-4M17 20v-4"/></svg><p><b>Ar-condicionado</b><span>Split silencioso em todos os quartos</span></p></div>
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 17h14l-1.5-6h-11z"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/><path d="M7 11l2-4h6l2 4"/></svg><p><b>Estacionamento</b><span>Gratuito e fechado, 8 vagas</span></p></div>
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 18c3-2 6-2 9 0s6 2 9 0"/><path d="M3 13c3-2 6-2 9 0s6 2 9 0"/></svg><p><b>Lago e cavalos</b><span>Cavalgada, pesca e passeio de caiaque</span></p></div>
+      <div><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="7" cy="8" r="2"/><circle cx="17" cy="8" r="2"/><circle cx="4.5" cy="13" r="1.6"/><circle cx="19.5" cy="13" r="1.6"/><path d="M8 18c0-3 2-5 4-5s4 2 4 5c0 1.5-1.5 2-4 2s-4-.5-4-2z"/></svg><p><b>Aceita pets</b><span>Pequeno porte, com aviso prévio</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section class="dark" id="atendimento">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Estrutura de atendimento</h2>
+      <p>O hóspede é atendido na hora, 24 horas por dia. O dono só entra quando precisa decidir algo. Clique no botão amarelo no canto da tela para testar o atendente virtual.</p>
+    </div>
+    <div class="flow">
+      <div><b>Atendente virtual 24h</b><span>Responde preço, horários, café, pets, pagamento e localização no site e no WhatsApp.</span></div>
+      <div><b>Pedido de reserva pronto</b><span>O cliente simula o valor e a recepção recebe nome, datas, quarto e total numa mensagem só.</span></div>
+      <div><b>Confirmação com sinal</b><span>Envio da chave Pix e da política de cancelamento. Reserva só bloqueia a data após o sinal.</span></div>
+      <div><b>Lembretes automáticos</b><span>Mensagem 1 dia antes do check-in com localização e horários. Pedido de avaliação no Google após o check-out.</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head"><h2>Dúvidas frequentes</h2></div>
+    <div class="faq">
+      <details><summary>Quais são os horários de check-in e check-out?</summary><p>Check-in a partir das 14h e check-out até 12h. Early check-in e late check-out sob consulta, conforme disponibilidade.</p></details>
+      <details><summary>Como funciona o pagamento?</summary><p>Sinal de 30% via Pix para confirmar e o restante no check-in, em Pix, débito ou crédito (até 3x sem juros).</p></details>
+      <details><summary>Qual a política de cancelamento?</summary><p>Cancelamento com até 7 dias de antecedência: sinal devolvido integralmente. Com menos de 7 dias, o sinal vira crédito para outra data em até 6 meses.</p></details>
+      <details><summary>Crianças pagam?</summary><p>Crianças até 6 anos não pagam no mesmo quarto dos pais. A partir de 7 anos contam como hóspede.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="localizacao">
+  <div class="wrap loc">
+    <div>
+      <div class="sec-head"><h2>Como chegar</h2><p>Estrada Vicinal dos Ipês, km 6 · Zona Rural (endereço ilustrativo)</p></div>
+      <ul>
+        <li><span>Centro da cidade</span><span class="num">15 min de carro</span></li>
+        <li><span>Rodoviária</span><span class="num">20 min de carro</span></li>
+        <li><span>Aeroporto</span><span class="num">35 min de carro</span></li>
+        <li><span>Cachoeira mais próxima</span><span class="num">25 min de carro</span></li>
+      </ul>
+    </div>
+    <div class="map">
+      <svg viewBox="0 0 480 300" width="100%" role="img" aria-label="Mapa ilustrativo da localização da pousada">
+        <rect width="480" height="300" fill="var(--bg)"/>
+        <path d="M0 210 C120 180 200 250 320 220 S440 190 480 200 V300 H0Z" fill="color-mix(in srgb, var(--info) 30%, var(--bg))"/>
+        <g stroke="var(--line)" stroke-width="10" fill="none" stroke-linecap="round">
+          <path d="M40 40 L440 60"/><path d="M120 20 L160 190"/><path d="M300 30 L280 200"/><path d="M40 130 L460 140"/>
+        </g>
+        <g fill="var(--muted)" font-family="Figtree, sans-serif" font-size="12" font-weight="600">
+          <text x="60" y="30">Centro</text><text x="380" y="125">Rodoviária</text><text x="40" y="270">Lago</text>
+        </g>
+        <circle cx="290" cy="190" r="26" fill="var(--sun)" opacity=".25"/>
+        <path d="M290 160c-12 0-20 9-20 19 0 14 20 31 20 31s20-17 20-31c0-10-8-19-20-19z" fill="var(--forest)"/>
+        <circle cx="290" cy="179" r="7" fill="var(--sun)"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="painel">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Painel do proprietário</h2>
+      <p>Área interna onde o dono acompanha pedidos, ocupação e próximos check-ins. Faça um pedido no simulador acima e ele aparece aqui como novo.</p>
+    </div>
+    <div class="panel-shell">
+      <div class="panel-top"><b>Sítio dos Ipês · Gestão</b><span class="chip">Novembro 2026</span><span class="pill info tag">Dados de exemplo</span></div>
+      <div class="tiles">
+        <div class="tile"><span>Ocupação do mês</span><b class="num" id="tOcc">—</b> <small>dos quartos-noite</small></div>
+        <div class="tile"><span>Receita prevista</span><b class="num" id="tRev">—</b></div>
+        <div class="tile"><span>Pedidos aguardando sinal</span><b class="num" id="tPend">—</b></div>
+        <div class="tile"><span>Atendimentos pelo robô (7 dias)</span><b class="num">146</b> <small>12 passados à recepção</small></div>
+      </div>
+      <div class="panel-body">
+        <div>
+          <h3 style="margin-bottom:10px">Reservas e pedidos</h3>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Hóspede</th><th>Quarto</th><th>Período</th><th>Total</th><th>Status</th><th></th></tr></thead>
+              <tbody id="resBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>Ocupação · Novembro</h3>
+          <div class="occ" id="occ"></div>
+          <div class="legend"><span><i style="background:var(--forest-2)"></i>Lotado</span><span><i style="background:color-mix(in srgb,var(--forest-2) 45%,var(--bg))"></i>Parcial</span><span><i style="background:var(--bg);border:1px solid var(--line)"></i>Livre</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="projeto">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>O que este projeto entrega</h2>
+      <p>Tudo o que aparece nesta demonstração pode ser montado com a identidade, as fotos e os preços reais da sua pousada.</p>
+    </div>
+    <div class="deliver">
+      <div><b>Site rápido e responsivo</b><span>Funciona bem no celular, onde está a maioria dos hóspedes.</span></div>
+      <div><b>Reserva direta, sem comissão</b><span>Pedidos chegam no seu WhatsApp, sem pagar taxa de 15% a 20% às plataformas.</span></div>
+      <div><b>Atendente virtual</b><span>Responde as perguntas repetidas e passa para você o que precisa de decisão.</span></div>
+      <div><b>Painel de gestão</b><span>Pedidos, sinais, ocupação e receita prevista em uma tela.</span></div>
+      <div><b>Google e Instagram</b><span>Perfil no Google Maps, link na bio e botão de reserva no Instagram.</span></div>
+      <div><b>Suporte e ajustes</b><span>Troca de preços, fotos e temporadas sempre que precisar.</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b>Sítio dos Ipês</b><br>Pousada fictícia usada como demonstração.</div>
+    <div><b>Desenvolvido por Kelvin</b><br>Sites e automação de atendimento</div>
+  </div>
+</footer>
+
+<!-- Chat -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir atendimento" aria-expanded="false">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>
+  <span class="dot"></span>
+</button>
+<div class="chat" id="chat" role="dialog" aria-label="Atendimento da pousada">
+  <div class="chat-head">
+    <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="var(--sun)"/><path d="M6 21c3-2 6-2 10 0s7 2 10 0" stroke="var(--forest)" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>
+    <div><b>Atendimento Sítio dos Ipês</b><small>Online agora · responde na hora</small></div>
+    <button id="chatClose" aria-label="Fechar atendimento">×</button>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="quick-replies" id="qr"></div>
+  <form id="chatForm"><input id="chatInput" placeholder="Digite sua pergunta" autocomplete="off" aria-label="Sua pergunta"><button class="btn btn-sun" style="padding:10px 14px">Enviar</button></form>
+</div>
+
+<script>
+const ROOMS=[
+  {id:"casal",name:"Quarto Casal",price:220,base:2,max:3,size:"20 m²",tags:["Cama de ferro", "Ladrilho hidráulico", "Vista do jardim"],alt:"Quarto casal com cama de ferro antiga, colcha de crochê e janela azul para o jardim"},
+  {id:"familia",name:"Quarto Família",price:320,base:4,max:5,size:"30 m²",tags:["Casal + 2 solteiros", "Pé-direito alto", "Vista do pasto"],alt:"Quarto família com cama de casal, duas camas de solteiro e janelas para o pasto"},
+  {id:"varanda",name:"Suíte do Lago",price:380,base:2,max:3,size:"26 m²",tags:["Varanda para o lago", "Banheira", "Cadeiras de balanço"],alt:"Suíte com banheira e varanda com cadeiras de balanço de frente para o lago"}
+];
+const BRL=v=>v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+const $=id=>document.getElementById(id);
+
+function roomPic(r){
+  return `<img class="pic" src="../img/fazenda/quarto-${r.id}.webp" alt="${r.alt}" width="800" height="600" loading="lazy">`;
+}
+
+function renderRooms(){
+  $("rooms").innerHTML=ROOMS.map((r,i)=>`
+    <article class="room">${roomPic(r)}
+      <div class="body">
+        <h3>${r.name}</h3>
+        <div class="meta"><span class="chip">${r.size}</span><span class="chip">Até ${r.max} pessoas</span>${r.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
+        <div class="price"><b class="num">${BRL(r.price)}</b><span>/ noite</span></div>
+        <div class="actions"><button class="btn btn-sun" data-pick="${r.id}">Reservar este quarto</button></div>
+      </div></article>`).join("");
+  $("bRoom").innerHTML=ROOMS.map(r=>`<option value="${r.id}">${r.name} · ${BRL(r.price)}/noite</option>`).join("");
+  document.querySelectorAll("[data-pick]").forEach(b=>b.addEventListener("click",()=>{
+    $("bRoom").value=b.dataset.pick; calc(); $("reservar").scrollIntoView();
+  }));
+}
+
+function iso(d){return d.toISOString().slice(0,10)}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function fmt(s){const [y,m,d]=s.split("-");return `${d}/${m}`}
+function nightsBetween(a,b){return Math.round((new Date(b+"T12:00")-new Date(a+"T12:00"))/864e5)}
+
+let current=null;
+function calc(){
+  const r=ROOMS.find(x=>x.id===$("bRoom").value);
+  const a=$("bIn").value,b=$("bOut").value,g=+$("bGuests").value;
+  const err=$("sErr"); err.hidden=true; $("sentBox").hidden=true;
+  $("sRoom").textContent=r.name;
+  let n=a&&b?nightsBetween(a,b):0;
+  let problem="";
+  if(!a||!b) problem="Escolha as datas de check-in e check-out.";
+  else if(n<1) problem="O check-out precisa ser depois do check-in.";
+  else if(g>r.max) problem=`O quarto ${r.name} comporta até ${r.max} pessoas. Escolha o Quarto Família ou reduza os hóspedes.`;
+  const extraG=Math.max(0,g-r.base), extra=n>0?extraG*50*n:0;
+  const addons=($("bPet").checked?30:0)+($("bTransfer").checked?40:0);
+  const total=n>0?r.price*n+extra+addons:0;
+  $("sDates").textContent=a&&b&&n>0?`${fmt(a)} → ${fmt(b)}`:"—";
+  $("sNights").textContent=n>0?`${n} × ${BRL(r.price)}`:"—";
+  $("sExtra").textContent=extraG&&n>0?`${extraG} × R$ 50 × ${n}`:"—";
+  $("sAddons").textContent=addons?BRL(addons):"—";
+  $("sTotal").textContent=BRL(total);
+  $("sDeposit").textContent=total?BRL(Math.round(total*.3)):"—";
+  if(problem){err.textContent=problem;err.hidden=false}
+  const name=$("bName").value.trim()||"(seu nome)";
+  const msg=`Olá! Gostaria de reservar na Pousada Sítio dos Ipês.
+Nome: ${name}
+Quarto: ${r.name}
+Check-in: ${a?fmt(a):"—"} · Check-out: ${b?fmt(b):"—"} (${n>0?n:0} noites)
+Hóspedes: ${g}${$("bPet").checked?"\nCom pet de pequeno porte":""}${$("bTransfer").checked?"\nCom transfer da rodoviária":""}
+Total simulado: ${BRL(total)}`;
+  $("waPreview").textContent=msg;
+  current=problem?null:{r,a,b,n,g,total,name:$("bName").value.trim()};
+}
+["bRoom","bIn","bOut","bGuests","bName","bPet","bTransfer"].forEach(id=>$(id).addEventListener("input",calc));
+
+$("sendBtn").addEventListener("click",()=>{
+  calc();
+  if(!current){$("sErr").hidden=false;return}
+  if(!current.name){$("sErr").textContent="Informe seu nome para enviar o pedido.";$("sErr").hidden=false;return}
+  RES.unshift({guest:current.name,room:current.r.name,a:current.a,b:current.b,total:current.total,status:"Aguardando sinal",cls:"warn",isNew:true});
+  renderPanel();
+  $("sentBox").innerHTML=`Pedido registrado nesta demonstração. No site real, ele abre o WhatsApp da pousada com a mensagem acima e aparece no <a href="#painel">painel do proprietário</a>.`;
+  $("sentBox").hidden=false;
+});
+
+$("quickForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  $("bIn").value=$("qIn").value;$("bOut").value=$("qOut").value;$("bGuests").value=$("qGuests").value;
+  if(+$("qGuests").value>3) $("bRoom").value="familia";
+  calc(); $("reservar").scrollIntoView();
+});
+
+/* Painel */
+const today=new Date(2026,10,3);
+const RES=[
+  {guest:"Mariana L.",room:"Suíte do Lago",a:"2026-11-06",b:"2026-11-08",total:640,status:"Confirmada",cls:"ok"},
+  {guest:"Família Rocha",room:"Quarto Família",a:"2026-11-07",b:"2026-11-10",total:780,status:"Confirmada",cls:"ok"},
+  {guest:"Carlos E.",room:"Quarto Casal",a:"2026-11-12",b:"2026-11-14",total:360,status:"Aguardando sinal",cls:"warn"},
+  {guest:"Patrícia M.",room:"Quarto Casal",a:"2026-11-14",b:"2026-11-16",total:410,status:"Confirmada",cls:"ok"},
+  {guest:"João e Bia",room:"Suíte do Lago",a:"2026-11-20",b:"2026-11-23",total:960,status:"Confirmada",cls:"ok"},
+  {guest:"Grupo Ribeiro",room:"Quarto Família",a:"2026-11-27",b:"2026-11-30",total:930,status:"Aguardando sinal",cls:"warn"}
+];
+const OCC=[2,1,3,4,5,6,8,8,7,3,2,4,5,6,8,7,4,3,2,3,6,8,8,6,3,2,5,7,8,6]; // quartos ocupados por dia (de 8)
+function renderPanel(){
+  $("resBody").innerHTML=RES.map((r,i)=>`<tr class="${r.isNew?"new":""}">
+    <td>${r.guest}${r.isNew?' <span class="pill info">Novo</span>':""}</td><td>${r.room}</td>
+    <td class="num">${fmt(r.a)} → ${fmt(r.b)}</td><td class="num">${BRL(r.total)}</td>
+    <td><span class="pill ${r.cls}">${r.status}</span></td>
+    <td>${r.cls==="warn"?`<button class="mini-btn" data-confirm="${i}">Sinal recebido</button>`:""}</td></tr>`).join("");
+  document.querySelectorAll("[data-confirm]").forEach(b=>b.addEventListener("click",()=>{
+    const r=RES[+b.dataset.confirm]; r.status="Confirmada"; r.cls="ok"; renderPanel();
+  }));
+  const occPct=Math.round(OCC.reduce((s,x)=>s+x,0)/(OCC.length*8)*100);
+  $("tOcc").textContent=occPct+"%";
+  $("tRev").textContent=BRL(RES.reduce((s,r)=>s+r.total,0)+9840);
+  $("tPend").textContent=RES.filter(r=>r.cls==="warn").length;
+}
+function renderOcc(){
+  const first=new Date(2026,10,1).getDay();
+  let h=["D","S","T","Q","Q","S","S"].map(d=>`<div class="h">${d}</div>`).join("");
+  for(let i=0;i<first;i++) h+=`<div></div>`;
+  OCC.forEach((v,i)=>{
+    const full=v>=8, part=v>=4;
+    const bg=full?"var(--forest-2)":part?"color-mix(in srgb,var(--forest-2) 45%,var(--bg))":"var(--bg)";
+    const col=full?"#fff":"var(--ink)";
+    h+=`<div title="${i+1}/11: ${v} de 8 quartos" style="background:${bg};color:${col};border:1px solid var(--line)">${i+1}</div>`;
+  });
+  $("occ").innerHTML=h;
+}
+
+/* Chat */
+const KB=[
+  {k:["preço","preco","valor","diária","diaria","quanto"],a:()=>`Nossas diárias, com café incluso:\n• Quarto Casal: R$ 220\n• Quarto Família: R$ 320\n• Suíte do Lago: R$ 380\nQuer que eu simule com as suas datas?`,q:["Simular reserva","Formas de pagamento"]},
+  {k:["check-in","checkin","check in","horário","horario","entrada","saída","saida","check-out"],a:()=>"Check-in a partir das 14h e check-out até 12h. Se chegar mais cedo, guardamos sua bagagem sem custo.",q:["Café da manhã","Estacionamento"]},
+  {k:["café","cafe","manhã","manha"],a:()=>"O café da roça é servido das 7h às 10h e está incluso na diária: queijo da casa, pão caseiro, fogão a lenha, ovos e sucos.",q:["Ver preços","Aceita pets?"]},
+  {k:["pet","cachorro","gato","animal"],a:()=>"Aceitamos pets de pequeno porte, com taxa de R$ 30 por estadia. É só avisar na reserva.",q:["Simular reserva","Ver preços"]},
+  {k:["estacionamento","carro","vaga","garagem"],a:()=>"Temos estacionamento fechado e gratuito com 8 vagas.",q:["Como chegar","Ver preços"]},
+  {k:["wifi","wi-fi","internet"],a:()=>"Wi-Fi de 300 Mb em todos os quartos e áreas comuns. A senha vem no cartão do quarto.",q:["Ver preços"]},
+  {k:["pagamento","pagar","pix","cartão","cartao","parcel"],a:()=>"Para confirmar, pedimos sinal de 30% via Pix. O restante pode ser pago no check-in em Pix, débito ou crédito em até 3x.",q:["Cancelamento","Simular reserva"]},
+  {k:["cancel"],a:()=>"Cancelando com 7 dias ou mais de antecedência, devolvemos o sinal. Com menos de 7 dias, o sinal vira crédito para outra data em até 6 meses.",q:["Simular reserva"]},
+  {k:["chegar","endereço","endereco","localização","localizacao","onde"],a:()=>"Ficamos na Estrada Vicinal dos Ipês, km 6, Zona Rural. São 15 min do centro e 20 min da rodoviária. Também oferecemos transfer da rodoviária por R$ 40.",q:["Estacionamento","Simular reserva"]},
+  {k:["criança","crianca","filho","bebê","bebe"],a:()=>"Crianças até 6 anos não pagam no quarto dos pais. A partir de 7 anos contam como hóspede.",q:["Quarto Família","Ver preços"]},
+  {k:["família","familia"],a:()=>"O Quarto Família tem 30 m², cama de casal e 2 de solteiro, para até 5 pessoas. Diária de R$ 320 para 4 pessoas, +R$ 50 para a 5ª.",q:["Simular reserva"]},
+  {k:["simular","reservar","reserva","disponib"],a:()=>{document.getElementById("reservar").scrollIntoView();return "Abri o simulador de reserva na página. Escolha as datas e o quarto que eu monto o pedido para a recepção."},q:["Formas de pagamento","Cancelamento"]},
+  {k:["atendente","humano","pessoa","falar com"],a:()=>"Certo! Vou passar sua conversa para a recepção. No site real, aqui abre o WhatsApp da pousada com o seu histórico. Atendimento humano das 7h às 22h.",q:["Ver preços"]}
+];
+const DEFAULT_Q=["Ver preços","Horário de check-in","Aceita pets?","Formas de pagamento","Falar com atendente"];
+function addMsg(t,who){const d=document.createElement("div");d.className="msg "+who;d.textContent=t;$("msgs").appendChild(d);$("msgs").scrollTop=1e6}
+function setQR(list){$("qr").innerHTML=list.map(q=>`<button type="button">${q}</button>`).join("");$("qr").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>ask(b.textContent)))}
+function ask(t){
+  addMsg(t,"me");
+  const low=t.toLowerCase();
+  const hit=KB.find(e=>e.k.some(k=>low.includes(k)));
+  setTimeout(()=>{
+    if(hit){addMsg(hit.a(),"bot");setQR(hit.q.concat(["Falar com atendente"]))}
+    else{addMsg("Não tenho essa resposta pronta, mas a recepção responde rapidinho. Quer que eu passe para um atendente?","bot");setQR(["Falar com atendente","Ver preços"])}
+  },450);
+}
+let greeted=false;
+function openChat(open){
+  $("chat").classList.toggle("open",open);$("chatFab").setAttribute("aria-expanded",open);
+  if(open&&!greeted){greeted=true;addMsg("Olá! Sou o atendente virtual da Sítio dos Ipês. Posso ajudar com preços, horários, pets, pagamento e reservas.","bot");setQR(DEFAULT_Q)}
+  if(open) $("chatInput").focus();
+}
+$("chatFab").addEventListener("click",()=>openChat(!$("chat").classList.contains("open")));
+$("chatClose").addEventListener("click",()=>openChat(false));
+$("chatForm").addEventListener("submit",e=>{e.preventDefault();const v=$("chatInput").value.trim();if(!v)return;$("chatInput").value="";ask(v)});
+
+/* Init */
+renderRooms();
+const inD=addDays(new Date(),7), outD=addDays(new Date(),9);
+$("qIn").value=$("bIn").value=iso(inD);$("qOut").value=$("bOut").value=iso(outD);
+$("bRoom").value="varanda";
+calc();renderPanel();renderOcc();
+</script>
+</body>
+</html>
