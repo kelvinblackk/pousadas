@@ -145,7 +145,7 @@ footer{{padding:30px 0 90px;color:var(--muted);font-size:.88rem;text-align:cente
 <section id="galeria"><h2>Galeria</h2><div class="gal">{gal}</div></section>
 <section id="local"><div class="loc"><div><h2 style="margin-bottom:6px">Como chegar</h2><p>{s["where"]}</p></div><a class="btn" href="https://wa.me/5595981020209">Pedir localização no WhatsApp</a></div></section>
 </div>
-<footer>{s["title"]} · modelo de site demonstrativo desenvolvido por Kelvin</footer>
+<footer>{s["title"]} · modelo de site demonstrativo desenvolvido por Kelvin Jordan</footer>
 <a class="wa" href="https://wa.me/5595981020209">WhatsApp</a>
 {LIGHTBOX}
 </body></html>'''
