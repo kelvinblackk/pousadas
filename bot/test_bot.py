@@ -3,7 +3,7 @@ import os
 import tempfile
 
 os.environ.update(DB_PATH=os.path.join(tempfile.mkdtemp(), "t.db"), WA_TOKEN="", APP_SECRET="", PANEL_PASS="teste")
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
 
@@ -57,6 +57,30 @@ manda("oi?")
 assert app.db().execute("select count(*) from msgs where dir='out'").fetchone()[0] == antes
 cli.post(f"/painel/robo/{FONE}", auth=("dono", "teste"))
 assert "Voltei" in app.db().execute("select body from msgs where dir='out' order by id desc").fetchone()[0]
+
+# frase livre: entende tudo de uma vez e só pergunta o que falta
+H = date.today()
+r = app.entender("queria um quarto pra mim e minha esposa de 14/11 a 16/11 com nosso cachorro", date(2026, 11, 5))
+assert (r["a"], r["b"], r["g"], r["pet"]) == ("2026-11-14", "2026-11-16", 2, True)
+assert app.entender("somos um casal com 2 filhos, dia 20/12 por 3 noites", date(2026, 11, 5)) == {"a": "2026-12-20", "b": "2026-12-23", "g": 4}
+assert app.entender("3 pessoas de 1 a 4/12", date(2026, 11, 5))["g"] == 3
+manda("menu")
+out = manda("quanto custa 3 pessoas de 1 a 4/12?")
+assert "Entendi" in out and "3 pessoas" in out and "recepção" not in out
+assert "pet" in manda("#casal")                       # id "casal" da lista não vira "um casal"
+assert "3 hóspede(s)" in manda("não") and "R$ 690" in app.db().execute("select body from msgs where dir='out' order by id desc").fetchone()[0]  # 180*3 + 50*3
+manda("#ok")
+
+# cancelamento: escolhe a reserva, aplica a regra e atualiza o painel
+assert "Qual reserva" in manda("quero cancelar minha reserva")
+id_690 = app.db().execute("select id from pedidos where total=690").fetchone()[0]
+assert "não tem custo" in manda(f"#c{id_690}")     # sinal ainda não pago
+assert "cancelada" in manda("sim")
+assert app.db().execute("select status, obs from pedidos where id=?", (id_690,)).fetchone()[:] == ("Cancelada", "sem sinal")
+p = {"status": "Confirmada", "sinal": 100}
+assert app.regra_cancelamento(p | {"a": (H + timedelta(days=10)).isoformat()}, H)[0] == "devolver sinal"
+assert app.regra_cancelamento(p | {"a": (H + timedelta(days=3)).isoformat()}, H)[0] == "crédito 6 meses"
+assert "continua de pé" in (manda("desisti da reserva") and manda("não"))
 
 # datas: virada de ano e data inválida
 assert app.ler_datas("30/12 a 02/01", date(2026, 11, 5)) == (date(2026, 12, 30), date(2027, 1, 2))

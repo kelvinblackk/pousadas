@@ -11,7 +11,7 @@ import os
 import re
 import secrets
 import sqlite3
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from html import escape
 from pathlib import Path
 
@@ -62,8 +62,10 @@ with db() as c:
     create table if not exists convs(phone text primary key, name text, state text, data text default '{}', human int default 0);
     create table if not exists msgs(id integer primary key, phone text, dir text, body text, ts text);
     create table if not exists pedidos(id integer primary key, phone text, name text, room text, a text, b text,
-        guests int, pet int, total int, sinal int, status text, ts text);
+        guests int, pet int, total int, sinal int, status text, ts text, obs text);
     """)
+    if "obs" not in [x[1] for x in c.execute("pragma table_info(pedidos)")]:  # banco criado antes do cancelamento
+        c.execute("alter table pedidos add column obs text")
 
 
 def conv(phone, name=""):
@@ -129,23 +131,25 @@ FAQ = {
     "local": "Rua das Palmeiras, 120 · Beira-Rio (endereço ilustrativo). 5 min do centro e 12 min da rodoviária. Estacionamento grátis.",
 }
 PALAVRAS = [
-    ("atendente", ["atendente", "humano", "pessoa", "recepção", "recepcao", "falar com"]),
+    ("atendente", ["atendente", "humano", "uma pessoa", "recepção", "recepcao", "falar com"]),
     ("reservar", ["reserv", "disponib", "vaga"]),
-    ("precos", ["preço", "preco", "valor", "diária", "diaria", "quanto"]),
+    ("precos", ["preço", "preco", "valor", "diária", "diaria", "quanto", "custa"]),
     ("horarios", ["check", "horário", "horario", "café", "cafe"]),
     ("pets", ["pet", "cachorro", "gato", "animal"]),
     ("pagamento", ["pagamento", "pagar", "pix", "cartão", "cartao", "parcel"]),
     ("cancelamento", ["cancel"]),
     ("local", ["endereço", "endereco", "onde", "chegar", "localiza", "estacionamento"]),
 ]
-MENU = [("precos", "Preços e quartos", "Diárias com café incluso"),
+MENU = [("precos", "Preços e quartos", "Diárias com café incluso"),  # até 10 linhas (limite do WhatsApp)
         ("reservar", "Fazer uma reserva", "Calculo o total na hora"),
+        ("cancelar_reserva", "Cancelar uma reserva", None),
         ("horarios", "Check-in e café", None),
         ("pets", "Aceita pets?", None),
         ("pagamento", "Formas de pagamento", None),
         ("cancelamento", "Cancelamento", None),
         ("local", "Como chegar", None),
         ("atendente", "Falar com a recepção", None)]
+NUM = {"um": 1, "uma": 1, "dois": 2, "duas": 2, "três": 3, "tres": 3, "quatro": 4, "cinco": 5}
 
 
 def menu(phone, intro="Como posso ajudar?"):
@@ -160,29 +164,177 @@ def intencao(t):
     return None
 
 
-def ler_datas(t, hoje):
-    achadas = re.findall(r"(\d{1,2})/(\d{1,2})", t)
-    if len(achadas) < 2:
+def _data(d, m, hoje):
+    try:
+        x = date(hoje.year, m, d)
+    except ValueError:  # 31/02 e afins
         return None
-    ds = []
-    for d, m in achadas[:2]:
-        try:
-            x = date(hoje.year, int(m), int(d))
-        except ValueError:
-            return None
-        if x < hoje:  # data já passou neste ano: é do ano que vem
-            x = x.replace(year=hoje.year + 1)
-        ds.append(x)
-    a, b = ds
+    return x.replace(year=hoje.year + 1) if x < hoje else x
+
+
+def ler_datas(t, hoje):
+    a = b = None
+    ach = re.findall(r"(\d{1,2})/(\d{1,2})", t)
+    curto = re.search(r"(\d{1,2})\s*(?:a|até|ao|e|-)\s*(\d{1,2})/(\d{1,2})", t)  # "14 a 16/11"
+    qtd = re.search(r"(\d+)\s*(?:noites?|di[aá]rias?)", t)                      # "14/11 por 2 noites"
+    if len(ach) >= 2:
+        a, b = _data(int(ach[0][0]), int(ach[0][1]), hoje), _data(int(ach[1][0]), int(ach[1][1]), hoje)
+    elif curto:
+        a, b = _data(int(curto[1]), int(curto[3]), hoje), _data(int(curto[2]), int(curto[3]), hoje)
+    elif len(ach) == 1 and qtd:
+        a = _data(int(ach[0][0]), int(ach[0][1]), hoje)
+        b = a and a + timedelta(days=int(qtd[1]))
+    if not a or not b:
+        return None
     if b <= a and b.replace(year=b.year + 1) > a:  # virada de ano, ex.: 30/12 a 02/01
         b = b.replace(year=b.year + 1)
     return (a, b) if (b - a).days >= 1 else None
+
+
+def entender(t, hoje):
+    """Lê da frase livre tudo o que der: datas, pessoas, pet e quarto."""
+    low, r = t.lower(), {}
+    ds = ler_datas(low, hoje)
+    if ds:
+        r["a"], r["b"] = ds[0].isoformat(), ds[1].isoformat()
+    g, achou = 0, False
+    for n, _ in re.findall(r"(\d+|uma?|duas|dois|três|tres|quatro|cinco)\s*(pessoas?|h[oó]spedes?|adultos?|crian[cç]as?|filh[oa]s?)", low):
+        g += int(n) if n.isdigit() else NUM[n]
+        achou = True
+    if re.search(r"\bcasal\b", low) and not re.search(r"quarto casal|standard", low):
+        g, achou = g + 2, True
+    elif re.search(r"\beu e (minha|meu)\b|minha esposa|meu marido|namorad[ao]", low):
+        g, achou = g + 2, True
+    elif re.search(r"sozinh[oa]", low) and not achou:
+        g, achou = 1, True
+    if achou and g > 0:
+        r["g"] = g
+    if re.search(r"\bsem (pet|cachorro|animal)", low):
+        r["pet"] = False
+    elif re.search(r"\bpet\b|cachorr|\bc[aã]o\b|cadela|\bgat[oa]\b|animal", low):
+        r["pet"] = True
+    if re.search(r"varanda|su[ií]te", low):
+        r["q"] = "varanda"
+    elif re.search(r"quarto fam[ií]lia", low):
+        r["q"] = "familia"
+    elif re.search(r"standard|quarto casal", low):
+        r["q"] = "casal"
+    return r
 
 
 def calcular(quarto, noites, hospedes, pet):
     q = QUARTOS[quarto]
     total = q["preco"] * noites + max(0, hospedes - q["base"]) * EXTRA_HOSPEDE * noites + (TAXA_PET if pet else 0)
     return total, round(total * SINAL)
+
+
+dm = lambda iso: f"{iso[8:10]}/{iso[5:7]}"
+noites_de = lambda d: (date.fromisoformat(d["b"]) - date.fromisoformat(d["a"])).days
+
+
+def entendi(r):
+    p = []
+    if "a" in r:
+        p.append(f"📅 {dm(r['a'])} a {dm(r['b'])}")
+    if "g" in r:
+        p.append(f"👥 {r['g']} pessoa{'s' if r['g'] > 1 else ''}")
+    if "pet" in r:
+        p.append("🐶 com pet" if r["pet"] else "sem pet")
+    if "q" in r:
+        p.append(f"🛏️ {QUARTOS[r['q']]['nome']}")
+    return "Entendi: " + " · ".join(p) if p else ""
+
+
+def proximo(phone, d):
+    """Pergunta só o que ainda falta para fechar a reserva. d['_ask'] guarda a última pergunta."""
+    def pergunta(ask):
+        d["_ask"] = ask
+        salvar(phone, "reserva", d)
+    if "a" not in d:
+        pergunta("datas")
+        return texto(phone, "Quais as datas de entrada e saída? Ex.: 14/11 a 16/11")
+    n = noites_de(d)
+    if d.get("g", 0) > 5:
+        d.pop("g")
+        texto(phone, 'Nossos quartos recebem até 5 pessoas. Para grupos maiores, escreva "atendente" que a recepção monta uma opção.')
+    if "g" not in d:
+        pergunta("hospedes")
+        return lista(phone, f"Entrada {dm(d['a'])} e saída {dm(d['b'])}: {n} noite(s). Quantos hóspedes?", "Escolher",
+                     [(str(k), f"{k} pessoa{'s' if k > 1 else ''}", None) for k in range(1, 6)])
+    if "q" in d and d["g"] > QUARTOS[d["q"]]["max"]:
+        texto(phone, f"O {QUARTOS[d['q']]['nome']} recebe até {QUARTOS[d['q']]['max']} pessoas. Veja os que cabem:")
+        d.pop("q")
+    if "q" not in d:
+        pergunta("quarto")
+        return lista(phone, f"Para {d['g']} pessoa(s) e {n} noite(s), estes quartos cabem:", "Ver quartos",
+                     [(k, q["nome"], f"Total {brl(calcular(k, n, d['g'], False)[0])} · até {q['max']} pessoas")
+                      for k, q in QUARTOS.items() if d["g"] <= q["max"]])
+    if "pet" not in d:
+        pergunta("pet")
+        return botoes(phone, "Vai levar pet de pequeno porte?", [("pet_sim", "Sim, vou levar"), ("pet_nao", "Não")])
+    d["total"], d["sinal"] = calcular(d["q"], n, d["g"], d["pet"])
+    pergunta("confirmar")
+    return botoes(phone, f"Resumo do pedido:\n🛏️ {QUARTOS[d['q']]['nome']}\n📅 {dm(d['a'])} a {dm(d['b'])} ({n} noites)\n"
+                         f"👥 {d['g']} hóspede(s){' + pet' if d['pet'] else ''}\n💰 Total: {brl(d['total'])}\n"
+                         f"Sinal para confirmar (30%): {brl(d['sinal'])}",
+                  [("ok", "Confirmar pedido"), ("refazer", "Mudar dados")])
+
+
+# ---------- cancelamento ----------
+def ativos(phone):
+    with db() as c:
+        return c.execute("select * from pedidos where phone=? and status!='Cancelada' order by id", (phone,)).fetchall()
+
+
+def regra_cancelamento(p, hoje):
+    dias = (date.fromisoformat(p["a"]) - hoje).days
+    if p["status"] != "Confirmada":
+        return "sem sinal", "Como o sinal ainda não foi pago, o cancelamento não tem custo."
+    if dias >= 7:
+        return "devolver sinal", f"Faltam {dias} dias para o check-in, então devolvemos o sinal de {brl(p['sinal'])} integralmente."
+    return "crédito 6 meses", f"Faltam {dias} dia(s) para o check-in, então o sinal de {brl(p['sinal'])} vira crédito para outra data em até 6 meses."
+
+
+def confirmar_cancelamento(phone, p, hoje):
+    salvar(phone, "cancelar", {"_ask": "confirmar", "cid": p["id"]})
+    return botoes(phone, f"Reserva nº {p['id']}: {p['room']}, de {dm(p['a'])} a {dm(p['b'])}.\n{regra_cancelamento(p, hoje)[1]}\nConfirma o cancelamento?",
+                  [("cancel_ok", "Sim, cancelar"), ("cancel_nao", "Não, manter")])
+
+
+def cancelar_inicio(phone, hoje):
+    lst = ativos(phone)
+    if not lst:
+        salvar(phone, "", {})
+        return texto(phone, 'Não encontrei nenhuma reserva ativa neste número. Se você reservou por outro canal, escreva "atendente" que a recepção ajuda.')
+    if len(lst) == 1:
+        return confirmar_cancelamento(phone, lst[0], hoje)
+    salvar(phone, "cancelar", {"_ask": "qual"})
+    return lista(phone, "Qual reserva você quer cancelar?", "Minhas reservas",
+                 [(f"c{p['id']}", f"Nº {p['id']} · {p['room']}"[:24], f"{dm(p['a'])} a {dm(p['b'])} · {brl(p['total'])}") for p in lst])
+
+
+def cancelar(phone, t, low, d, hoje):
+    if d.get("_ask") == "qual":
+        p = next((x for x in ativos(phone) if t == f"c{x['id']}" or str(x["id"]) in low), None)
+        return confirmar_cancelamento(phone, p, hoje) if p else texto(phone, "Escolha a reserva na lista, por favor.")
+    with db() as c:
+        p = c.execute("select * from pedidos where id=? and phone=?", (d.get("cid"), phone)).fetchone()
+    if not p:
+        salvar(phone, "", {})
+        return menu(phone)
+    if t == "cancel_nao" or re.match(r"^(n[aã]o|manter)", low):
+        salvar(phone, "", {})
+        return texto(phone, "Combinado, sua reserva continua de pé 🙂")
+    if t != "cancel_ok" and not re.match(r"^(sim|pode|cancela)", low):
+        return confirmar_cancelamento(phone, p, hoje)
+    tipo, _ = regra_cancelamento(p, hoje)
+    with db() as c:
+        c.execute("update pedidos set status='Cancelada', obs=? where id=?", (tipo, p["id"]))
+    salvar(phone, "", {})
+    validade = hoje + timedelta(days=182)
+    extra = {"devolver sinal": f"\nA recepção faz o Pix de devolução de {brl(p['sinal'])} em até 2 dias úteis.",
+             "crédito 6 meses": f"\nSeu crédito de {brl(p['sinal'])} vale até {validade:%d/%m/%Y}. É só pedir uma nova reserva por aqui."}.get(tipo, "")
+    return texto(phone, f"Reserva nº {p['id']} cancelada.{extra}\nSe mudar de ideia, estou por aqui!")
 
 
 def responder(phone, nome, entrada, hoje=None):
@@ -192,82 +344,79 @@ def responder(phone, nome, entrada, hoje=None):
     if c["human"]:
         return  # recepção atendendo pelo painel
     t = entrada.strip()
-    estado, dados = c["state"] or "", c["data"]
+    low, estado, d = t.lower(), c["state"] or "", c["data"]
 
-    if t.lower() in ("menu", "sair", "cancelar", "voltar", "início", "inicio"):
+    if low in ("menu", "sair", "voltar", "início", "inicio"):
         salvar(phone, "", {})
         return menu(phone, "Tudo bem, voltei ao início. Como posso ajudar?")
+    if t == "cancelar_reserva" or (re.search(r"cancel|desist", low) and re.search(r"reserva|pedido|hospedagem", low)):
+        return cancelar_inicio(phone, hoje)
+    if estado == "cancelar":
+        return cancelar(phone, t, low, d, hoje)
 
-    if estado == "datas":
-        datas = ler_datas(t, hoje)
-        if not datas:
-            return texto(phone, "Não entendi as datas 😅 Me mande assim: 14/11 a 16/11 (entrada e saída).")
-        a, b = datas
-        salvar(phone, "hospedes", {"a": a.isoformat(), "b": b.isoformat()})
-        return lista(phone, f"Entrada {a:%d/%m} e saída {b:%d/%m}: {(b - a).days} noite(s). Quantos hóspedes?",
-                     "Escolher", [(f"h{n}", f"{n} pessoa{'s' if n > 1 else ''}", None) for n in range(1, 6)])
-
-    if estado == "hospedes":
-        m = re.search(r"\d", t)
-        if not m or not 1 <= int(m.group()) <= 5:
-            return texto(phone, "Me diga o número de hóspedes, de 1 a 5.")
-        g = int(m.group())
-        dados["g"] = g
-        noites = (date.fromisoformat(dados["b"]) - date.fromisoformat(dados["a"])).days
-        salvar(phone, "quarto", dados)
-        linhas = [(k, q["nome"], f"Total {brl(calcular(k, noites, g, False)[0])} · até {q['max']} pessoas")
-                  for k, q in QUARTOS.items() if g <= q["max"]]
-        return lista(phone, f"Para {g} pessoa(s) e {noites} noite(s), estes quartos cabem:", "Ver quartos", linhas)
-
-    if estado == "quarto":
-        k = t if t in QUARTOS else next((k for k, q in QUARTOS.items() if q["nome"].lower() in t.lower()), None)
-        if not k or dados["g"] > QUARTOS[k]["max"]:
-            return texto(phone, "Escolha um dos quartos da lista, por favor.")
-        dados["q"] = k
-        salvar(phone, "pet", dados)
-        return botoes(phone, "Vai levar pet de pequeno porte?", [("pet_sim", "Sim, vou levar"), ("pet_nao", "Não")])
-
-    if estado == "pet":
-        if t not in ("pet_sim", "pet_nao") and not re.match(r"^(sim|s|não|nao|n)\b", t.lower()):
-            return botoes(phone, "É só tocar numa opção: vai levar pet?", [("pet_sim", "Sim, vou levar"), ("pet_nao", "Não")])
-        dados["pet"] = t == "pet_sim" or t.lower().startswith("s")
-        a, b = date.fromisoformat(dados["a"]), date.fromisoformat(dados["b"])
-        total, sinal = calcular(dados["q"], (b - a).days, dados["g"], dados["pet"])
-        dados |= {"total": total, "sinal": sinal}
-        salvar(phone, "confirmar", dados)
-        return botoes(phone, f"Resumo do pedido:\n🛏️ {QUARTOS[dados['q']]['nome']}\n📅 {a:%d/%m} a {b:%d/%m} ({(b - a).days} noites)\n"
-                             f"👥 {dados['g']} hóspede(s){' + pet' if dados['pet'] else ''}\n💰 Total: {brl(total)}\n"
-                             f"Sinal para confirmar (30%): {brl(sinal)}",
-                      [("ok", "Confirmar pedido"), ("refazer", "Mudar dados")])
-
-    if estado == "confirmar":
-        if t == "refazer":
-            salvar(phone, "datas", {})
-            return texto(phone, "Sem problema! Me mande de novo as datas: ex. 14/11 a 16/11.")
-        if t != "ok" and not t.lower().startswith(("sim", "confirm")):
-            return botoes(phone, "Posso registrar o pedido?", [("ok", "Confirmar pedido"), ("refazer", "Mudar dados")])
-        with db() as cx:
-            pid = cx.execute("insert into pedidos(phone,name,room,a,b,guests,pet,total,sinal,status,ts) values(?,?,?,?,?,?,?,?,?,?,?)",
-                             (phone, nome, QUARTOS[dados["q"]]["nome"], dados["a"], dados["b"], dados["g"], int(dados["pet"]),
-                              dados["total"], dados["sinal"], "Aguardando sinal", datetime.now().isoformat(timespec="seconds"))).lastrowid
+    if estado == "reserva":
+        ask = d.get("_ask")
+        if ask == "confirmar":
+            if t == "refazer" or re.search(r"mudar|trocar|alterar", low):
+                return proximo(phone, {})
+            if t == "ok" or re.match(r"^(sim|confirm|pode|ok)", low):
+                with db() as cx:
+                    pid = cx.execute("insert into pedidos(phone,name,room,a,b,guests,pet,total,sinal,status,ts) values(?,?,?,?,?,?,?,?,?,?,?)",
+                                     (phone, nome, QUARTOS[d["q"]]["nome"], d["a"], d["b"], d["g"], int(d["pet"]),
+                                      d["total"], d["sinal"], "Aguardando sinal", datetime.now().isoformat(timespec="seconds"))).lastrowid
+                salvar(phone, "", {})
+                return texto(phone, f"Pedido nº {pid} registrado ✅\nPara garantir a data, faça o Pix do sinal de {brl(d['sinal'])}:\n"
+                                    f"Chave Pix: {PIX_KEY}\nAssim que a recepção confirmar o pagamento, envio a confirmação por aqui.")
+        r = {"q": t} if ask == "quarto" and t in QUARTOS else entender(t, hoje)  # id da lista ("casal") não é "um casal"
+        if ask == "hospedes" and "g" not in r and re.fullmatch(r"\s*\d+\s*", t):
+            r["g"] = int(t)
+        if ask == "quarto" and "q" not in r:
+            k = next((k for k, q in QUARTOS.items() if q["nome"].lower() in low), None)
+            if k:
+                r["q"] = k
+        if ask == "pet" and "pet" not in r:
+            if t == "pet_sim" or re.match(r"^(sim|s|vou)\b", low):
+                r["pet"] = True
+            elif t == "pet_nao" or re.match(r"^(n[aã]o|n)\b", low):
+                r["pet"] = False
+        if r:
+            return proximo(phone, d | r)
+        if low == "cancelar" or re.search(r"desisti|deixa pra l[aá]", low):
+            salvar(phone, "", {})
+            return texto(phone, "Tudo bem, deixei a reserva de lado. Se precisar, é só chamar 🙂")
+        faq = intencao(t)
+        if faq in FAQ:  # responde a dúvida e retoma a reserva
+            texto(phone, FAQ[faq])
+            return proximo(phone, d)
+        if faq != "atendente":
+            texto(phone, "Não entendi as datas 😅 Pode mandar assim: 14/11 a 16/11." if ask == "datas" else "Não entendi 😅")
+            return proximo(phone, d)
         salvar(phone, "", {})
-        return texto(phone, f"Pedido nº {pid} registrado ✅\nPara garantir a data, faça o Pix do sinal de {brl(dados['sinal'])}:\n"
-                            f"Chave Pix: {PIX_KEY}\nAssim que a recepção confirmar o pagamento, envio a confirmação por aqui.")
 
+    r = entender(t, hoje)
     acao = t if any(t == i for i, _, _ in MENU) else intencao(t)
+    if r and acao != "atendente":  # já veio com datas, pessoas, pet ou quarto: vai direto para a reserva
+        if e := entendi(r):
+            texto(phone, e)
+        return proximo(phone, r)
+    if acao == "cancelamento":
+        texto(phone, FAQ["cancelamento"])
+        if ativos(phone):
+            return botoes(phone, "Quer cancelar uma reserva sua?", [("cancelar_reserva", "Cancelar reserva"), ("menu", "Não, só queria saber")])
+        return botoes(phone, "Posso ajudar com mais alguma coisa?", [("reservar", "Fazer uma reserva"), ("menu", "Outras dúvidas")])
     if acao in FAQ:
         texto(phone, FAQ[acao])
         return botoes(phone, "Quer fazer uma reserva?", [("reservar", "Sim, reservar"), ("menu", "Outras dúvidas")])
     if acao == "reservar":
-        salvar(phone, "datas", {})
-        return texto(phone, "Ótimo! Quais as datas de entrada e saída? Ex.: 14/11 a 16/11")
+        return proximo(phone, {})
     if acao == "atendente":
         salvar(phone, "", {}, human=1)
         return texto(phone, "Certo! Passei sua conversa para a recepção. Alguém responde por aqui em instantes 🙂")
     with db() as cx:
         primeira = not cx.execute("select 1 from msgs where phone=? and dir='out' limit 1", (phone,)).fetchone()
-    intro = (f"Olá{', ' + nome.split()[0] if nome else ''}! 👋 Sou o atendente virtual da {POUSADA}." if primeira
-             else "Posso ajudar só com assuntos da pousada 🙂 Escolha uma opção:")
+    intro = (f"Olá{', ' + nome.split()[0] if nome else ''}! 👋 Sou o atendente virtual da {POUSADA}. "
+             'Pode escrever do seu jeito, ex.: "quarto pra 2 de 14/11 a 16/11", ou escolher uma opção:' if primeira
+             else "Posso ajudar só com assuntos da pousada 🙂 Escolha uma opção ou escreva o que precisa:")
     return menu(phone, intro)
 
 
@@ -327,7 +476,7 @@ PAINEL = """<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta 
 <style>body{{font:15px system-ui,sans-serif;margin:0;background:#F3F6F1;color:#14231B}}main{{max-width:960px;margin:auto;padding:16px}}
 h1{{font-size:1.3rem}}h2{{font-size:1.05rem;margin-top:28px}}table{{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden}}
 td,th{{padding:8px;border-bottom:1px solid #DCE4DD;text-align:left;vertical-align:top}}th{{font-size:.75rem;text-transform:uppercase;color:#5A6B61}}
-.pill{{padding:2px 8px;border-radius:99px;font-size:.8rem;font-weight:700;background:#FDF0D5;color:#8a5a00}}.ok{{background:#DFF3E6;color:#1d6b3e}}
+.pill{{padding:2px 8px;border-radius:99px;font-size:.8rem;font-weight:700;background:#FDF0D5;color:#8a5a00}}.ok{{background:#DFF3E6;color:#1d6b3e}}.cx{{background:#FBE1DE;color:#A02B1E}}
 button{{border:0;border-radius:8px;padding:6px 10px;font-weight:700;background:#1D3B2C;color:#fff;cursor:pointer}}
 .box{{background:#fff;border:1px solid #DCE4DD;border-radius:10px;padding:12px;margin-top:10px}}.msg{{margin:4px 0}}.in{{color:#14231B}}.out{{color:#2C5641}}
 input[type=text]{{width:70%;padding:7px;border:1px solid #ccc;border-radius:8px}}.tag{{font-size:.8rem;color:#5A6B61}}</style></head>
@@ -346,8 +495,8 @@ def painel():
     fmt = lambda s: f"{s[8:10]}/{s[5:7]}"
     pedidos = "".join(
         f"<tr><td>{p['id']}</td><td>{escape(p['name'] or p['phone'])}</td><td>{escape(p['room'])}</td><td>{fmt(p['a'])} a {fmt(p['b'])}</td>"
-        f"<td>{brl(p['total'])}</td><td>{brl(p['sinal'])}</td><td><span class='pill {'ok' if p['status'] == 'Confirmada' else ''}'>{p['status']}</span></td>"
-        f"<td>{'' if p['status'] == 'Confirmada' else f'<form method=post action=/painel/sinal/{p['id']}><button>Sinal recebido</button></form>'}</td></tr>"
+        f"<td>{brl(p['total'])}</td><td>{brl(p['sinal'])}</td><td><span class='pill {'ok' if p['status'] == 'Confirmada' else 'cx' if p['status'] == 'Cancelada' else ''}'>{p['status']}{' · ' + p['obs'] if p['obs'] else ''}</span></td>"
+        f"<td>{f'<form method=post action=/painel/sinal/{p['id']}><button>Sinal recebido</button></form>' if p['status'] == 'Aguardando sinal' else ''}</td></tr>"
         for p in ps) or "<tr><td colspan=8>Nenhum pedido ainda.</td></tr>"
     humanos = "".join(
         f"<div class='box'><b>{escape(h['name'] or h['phone'])}</b> pediu atendimento."
@@ -363,7 +512,7 @@ def painel():
 def sinal(pid: int):
     with db() as c:
         p = c.execute("select * from pedidos where id=?", (pid,)).fetchone()
-        if not p:
+        if not p or p["status"] != "Aguardando sinal":
             raise HTTPException(404)
         c.execute("update pedidos set status='Confirmada' where id=?", (pid,))
     texto(p["phone"], f"Sinal recebido! 🎉 Sua reserva nº {pid} está confirmada: {p['room']}, de {p['a'][8:10]}/{p['a'][5:7]} a {p['b'][8:10]}/{p['b'][5:7]}.\n"

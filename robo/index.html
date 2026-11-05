@@ -116,6 +116,7 @@ tr.new td{background:color-mix(in srgb,var(--sun) 14%,transparent)}
 .st{display:inline-block;font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:999px}
 .st.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
 .st.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.st.cx{background:color-mix(in srgb,#C0392B 14%,transparent);color:#C0392B}
 .btn{border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.84rem;cursor:pointer;background:var(--forest);color:var(--forest-ink)}
 .btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
 .human{border:1.5px solid var(--sun);border-radius:14px;padding:12px;display:grid;gap:8px}
@@ -135,7 +136,7 @@ tr.new td{background:color-mix(in srgb,var(--sun) 14%,transparent)}
   <header class="top">
     <div>
       <h1>Teste o robô de atendimento</h1>
-      <p>Converse como se fosse um hóspede: tire dúvidas e faça uma reserva. Depois, no painel, marque o sinal como recebido e veja a confirmação chegar.</p>
+      <p>Escreva do seu jeito, como um hóspede: o robô entende datas, pessoas, pet e quarto na mesma frase e só pergunta o que faltar. Depois, no painel, marque o sinal como recebido ou peça o cancelamento.</p>
     </div>
     <a class="back" href="../">← Voltar ao portfólio</a>
   </header>
@@ -154,7 +155,7 @@ tr.new td{background:color-mix(in srgb,var(--sun) 14%,transparent)}
             <div class="pill">🔒 Conversa de demonstração. Mande uma mensagem para começar.</div>
           </div>
           <div class="chips" id="chips">
-            <button type="button">Oi</button><button type="button">Quanto custa a diária?</button><button type="button">Quero reservar</button><button type="button">Aceita pet?</button>
+            <button type="button">Oi</button><button type="button">Quarto pra 2 de 14/11 a 16/11 com meu cachorro</button><button type="button">Somos um casal com 2 filhos, dia 20/12 por 3 noites</button><button type="button">Quero cancelar minha reserva</button>
           </div>
           <form class="bar" id="bar"><input id="inp" placeholder="Mensagem" autocomplete="off" aria-label="Sua mensagem"><button aria-label="Enviar"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5 21 12 3 3.5l.01 6.6L15 12 3.01 13.9z"/></svg></button></form>
           <div class="sheet" id="sheet" hidden><div class="box" role="dialog" aria-label="Opções"><h3 id="sheetTitle"></h3><div id="sheetRows"></div></div></div>
@@ -207,7 +208,7 @@ const FAQ = {
   local: "Rua das Palmeiras, 120 · Beira-Rio (endereço ilustrativo). 5 min do centro e 12 min da rodoviária. Estacionamento grátis.",
 };
 const PALAVRAS = [
-  ["atendente", ["atendente", "humano", "pessoa", "recepção", "recepcao", "falar com"]],
+  ["atendente", ["atendente", "humano", "uma pessoa", "recepção", "recepcao", "falar com"]],
   ["reservar", ["reserv", "disponib", "vaga"]],
   ["precos", ["preço", "preco", "valor", "diária", "diaria", "quanto", "custa"]],
   ["horarios", ["check", "horário", "horario", "café", "cafe"]],
@@ -216,9 +217,9 @@ const PALAVRAS = [
   ["cancelamento", ["cancel"]],
   ["local", ["endereço", "endereco", "onde", "chegar", "localiza", "estacionamento"]],
 ];
-const MENU = [["precos", "Preços e quartos", "Diárias com café incluso"], ["reservar", "Fazer uma reserva", "Calculo o total na hora"],
+const MENU = [["precos", "Preços e quartos", "Diárias com café incluso"], ["reservar", "Fazer uma reserva", "Calculo o total na hora"], ["cancelar_reserva", "Cancelar uma reserva"],
   ["horarios", "Check-in e café"], ["pets", "Aceita pets?"], ["pagamento", "Formas de pagamento"], ["cancelamento", "Cancelamento"],
-  ["local", "Como chegar"], ["atendente", "Falar com a recepção"]];
+  ["local", "Como chegar"], ["atendente", "Falar com a recepção"]];  // até 10 linhas (limite do WhatsApp)
 
 const $ = id => document.getElementById(id);
 const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -297,81 +298,172 @@ $("chips").querySelectorAll("button").forEach(b => b.onclick = () => falar(b.tex
 const menu = intro => lista(intro, "Ver opções", MENU);
 const intencao = t => (PALAVRAS.find(([, ps]) => ps.some(p => t.toLowerCase().includes(p))) || [])[0];
 const hoje = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
-const dm = d => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+const dm = d => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 const noites = d => Math.round((new Date(d.b) - new Date(d.a)) / 864e5);
+const NUM = { um: 1, uma: 1, dois: 2, duas: 2, "três": 3, tres: 3, quatro: 4, cinco: 5 };
+
+function data(d, m) {
+  const h = hoje(), x = new Date(h.getFullYear(), m - 1, d);
+  if (x.getMonth() !== m - 1 || x.getDate() !== d) return null;  // 31/02 e afins
+  if (x < h) x.setFullYear(x.getFullYear() + 1);
+  return x;
+}
 function lerDatas(t) {
-  const ach = [...t.matchAll(/(\d{1,2})\/(\d{1,2})/g)].slice(0, 2);
-  if (ach.length < 2) return null;
-  const h = hoje(), ds = [];
-  for (const [, d, m] of ach) {
-    const x = new Date(h.getFullYear(), +m - 1, +d);
-    if (x.getMonth() !== +m - 1 || x.getDate() !== +d) return null;  // 31/02 e afins
-    if (x < h) x.setFullYear(x.getFullYear() + 1);
-    ds.push(x);
-  }
-  let [a, b] = ds;
-  if (b <= a) { const b2 = new Date(b); b2.setFullYear(b.getFullYear() + 1); if (b2 > a) b = b2; }
+  let a, b;
+  const ach = [...t.matchAll(/(\d{1,2})\/(\d{1,2})/g)];
+  const curto = t.match(/(\d{1,2})\s*(?:a|até|ao|e|-)\s*(\d{1,2})\/(\d{1,2})/);  // "14 a 16/11"
+  const qtd = t.match(/(\d+)\s*(?:noites?|di[aá]rias?)/);                      // "14/11 por 2 noites"
+  if (ach.length >= 2) { a = data(+ach[0][1], +ach[0][2]); b = data(+ach[1][1], +ach[1][2]); }
+  else if (curto) { a = data(+curto[1], +curto[3]); b = data(+curto[2], +curto[3]); }
+  else if (ach.length === 1 && qtd) { a = data(+ach[0][1], +ach[0][2]); if (a) { b = new Date(a); b.setDate(b.getDate() + +qtd[1]); } }
+  if (!a || !b) return null;
+  if (b <= a) { const b2 = new Date(b); b2.setFullYear(b.getFullYear() + 1); if (b2 > a) b = b2; }  // virada de ano
   return (b - a) / 864e5 >= 1 ? [a, b] : null;
+}
+// Lê da frase livre tudo o que der: datas, pessoas, pet e quarto.
+function entender(t) {
+  const low = t.toLowerCase(), r = {};
+  const ds = lerDatas(low);
+  if (ds) [r.a, r.b] = ds.map(Number);
+  let g = 0, achou = false;
+  for (const m of low.matchAll(/(\d+|uma?|duas|dois|três|tres|quatro|cinco)\s*(?:pessoas?|h[oó]spedes?|adultos?|crian[cç]as?|filh[oa]s?)/g)) { g += +m[1] || NUM[m[1]]; achou = true; }
+  if (/\bcasal\b/.test(low) && !/quarto casal|standard/.test(low)) { g += 2; achou = true; }
+  else if (/\beu e (minha|meu)\b|minha esposa|meu marido|namorad[ao]/.test(low)) { g += 2; achou = true; }
+  else if (/sozinh[oa]/.test(low) && !achou) { g = 1; achou = true; }
+  if (achou && g > 0) r.g = g;
+  if (/\bsem (pet|cachorro|animal)/.test(low)) r.pet = false;
+  else if (/\bpet\b|cachorr|\bc[aã]o\b|cadela|\bgat[oa]\b|animal/.test(low)) r.pet = true;
+  if (/varanda|su[ií]te/.test(low)) r.q = "varanda";
+  else if (/quarto fam[ií]lia/.test(low)) r.q = "familia";
+  else if (/standard|quarto casal/.test(low)) r.q = "casal";
+  return r;
 }
 function calcular(q, n, g, pet) {
   const Q = QUARTOS[q], total = Q.preco * n + Math.max(0, g - Q.base) * EXTRA * n + (pet ? PET : 0);
   return [total, Math.round(total * SINAL)];
 }
+function entendi(r) {
+  const p = [];
+  if (r.a) p.push(`📅 ${dm(r.a)} a ${dm(r.b)}`);
+  if (r.g) p.push(`👥 ${r.g} pessoa${r.g > 1 ? "s" : ""}`);
+  if (r.pet !== undefined) p.push(r.pet ? "🐶 com pet" : "sem pet");
+  if (r.q) p.push(`🛏️ ${QUARTOS[r.q].nome}`);
+  return p.length ? "Entendi: " + p.join(" · ") : "";
+}
+
+// Pergunta só o que ainda falta para fechar a reserva.
+function proximo() {
+  const d = conv.d; conv.state = "reserva";
+  if (!d.a) { conv.ask = "datas"; return texto("Quais as datas de entrada e saída? Ex.: 14/11 a 16/11"); }
+  const n = noites(d);
+  if (d.g > 5) { delete d.g; texto("Nossos quartos recebem até 5 pessoas. Para grupos maiores, escreva \"atendente\" que a recepção monta uma opção."); }
+  if (!d.g) { conv.ask = "hospedes"; return lista(`Entrada ${dm(d.a)} e saída ${dm(d.b)}: ${n} noite(s). Quantos hóspedes?`, "Escolher", [1, 2, 3, 4, 5].map(k => [String(k), `${k} pessoa${k > 1 ? "s" : ""}`])); }
+  if (d.q && d.g > QUARTOS[d.q].max) { texto(`O ${QUARTOS[d.q].nome} recebe até ${QUARTOS[d.q].max} pessoas. Veja os que cabem:`); delete d.q; }
+  if (!d.q) {
+    conv.ask = "quarto";
+    return lista(`Para ${d.g} pessoa(s) e ${n} noite(s), estes quartos cabem:`, "Ver quartos",
+      Object.entries(QUARTOS).filter(([, q]) => d.g <= q.max).map(([k, q]) => [k, q.nome, `Total ${brl(calcular(k, n, d.g, false)[0])} · até ${q.max} pessoas`]));
+  }
+  if (d.pet === undefined) { conv.ask = "pet"; return botoes("Vai levar pet de pequeno porte?", [["pet_sim", "Sim, vou levar"], ["pet_nao", "Não"]]); }
+  [d.total, d.sinal] = calcular(d.q, n, d.g, d.pet);
+  conv.ask = "confirmar";
+  return botoes(`Resumo do pedido:\n🛏️ ${QUARTOS[d.q].nome}\n📅 ${dm(d.a)} a ${dm(d.b)} (${n} noites)\n👥 ${d.g} hóspede(s)${d.pet ? " + pet" : ""}\n💰 Total: ${brl(d.total)}\nSinal para confirmar (30%): ${brl(d.sinal)}`,
+    [["ok", "Confirmar pedido"], ["refazer", "Mudar dados"]]);
+}
+
+// ---------- cancelamento ----------
+const ativos = () => pedidos.filter(p => p.status !== "Cancelada");
+function cancelarInicio() {
+  const lst = ativos();
+  conv.d = {};
+  if (!lst.length) { conv.state = ""; return texto("Não encontrei nenhuma reserva ativa nesta conversa. Se você reservou por outro canal, escreva \"atendente\" que a recepção ajuda."); }
+  conv.state = "cancelar";
+  if (lst.length === 1) return confirmarCancelamento(lst[0]);
+  conv.ask = "qual";
+  return lista("Qual reserva você quer cancelar?", "Minhas reservas", lst.map(p => [`c${p.id}`, `Nº ${p.id} · ${QUARTOS[p.q].nome}`, `${dm(p.a)} a ${dm(p.b)} · ${brl(p.total)}`]));
+}
+function regraCancelamento(p) {
+  const dias = Math.round((p.a - hoje()) / 864e5);
+  if (p.status !== "Confirmada") return { tipo: "sem sinal", texto: "Como o sinal ainda não foi pago, o cancelamento não tem custo." };
+  if (dias >= 7) return { tipo: "devolver sinal", texto: `Faltam ${dias} dias para o check-in, então devolvemos o sinal de ${brl(p.sinal)} integralmente.` };
+  return { tipo: "crédito 6 meses", texto: `Faltam ${dias} dia(s) para o check-in, então o sinal de ${brl(p.sinal)} vira crédito para outra data em até 6 meses.` };
+}
+function confirmarCancelamento(p) {
+  conv.state = "cancelar"; conv.ask = "confirmar"; conv.d = { cid: p.id };
+  return botoes(`Reserva nº ${p.id}: ${QUARTOS[p.q].nome}, de ${dm(p.a)} a ${dm(p.b)}.\n${regraCancelamento(p).texto}\nConfirma o cancelamento?`,
+    [["cancel_ok", "Sim, cancelar"], ["cancel_nao", "Não, manter"]]);
+}
+function cancelar(t, low) {
+  if (conv.ask === "qual") {
+    const p = ativos().find(x => t === `c${x.id}` || low.includes(String(x.id)));
+    return p ? confirmarCancelamento(p) : texto("Escolha a reserva na lista, por favor.");
+  }
+  const p = pedidos.find(x => x.id === conv.d.cid);
+  if (t === "cancel_nao" || /^(n[aã]o|manter)/.test(low)) { conv.state = ""; conv.d = {}; return texto("Combinado, sua reserva continua de pé 🙂"); }
+  if (t !== "cancel_ok" && !/^(sim|pode|cancela)/.test(low)) return confirmarCancelamento(p);
+  conv.state = ""; conv.d = {};
+  const regra = regraCancelamento(p);
+  p.status = "Cancelada"; p.obs = regra.tipo; p.novo = true;
+  painel(); registrar(`<b>Reserva nº ${p.id} cancelada pelo hóspede</b> (${regra.tipo}).`); avisar();
+  const validade = new Date(); validade.setMonth(validade.getMonth() + 6);
+  return texto(`Reserva nº ${p.id} cancelada.` + (regra.tipo === "devolver sinal" ? `\nA recepção faz o Pix de devolução de ${brl(p.sinal)} em até 2 dias úteis.`
+    : regra.tipo === "crédito 6 meses" ? `\nSeu crédito de ${brl(p.sinal)} vale até ${validade.toLocaleDateString("pt-BR")}. É só pedir uma nova reserva por aqui.` : "")
+    + "\nSe mudar de ideia, estou por aqui!");
+}
 
 function responder(t) {
   if (conv.human) { registrar(`<b>Hóspede:</b> ${esc(t)}`); return; }
   t = t.trim();
-  const low = t.toLowerCase(), s = conv.state, d = conv.d;
-  if (["menu", "sair", "cancelar", "voltar", "início", "inicio"].includes(low)) { conv.state = ""; conv.d = {}; return menu("Tudo bem, voltei ao início. Como posso ajudar?"); }
+  const low = t.toLowerCase(), d = conv.d;
+  if (["menu", "sair", "voltar", "início", "inicio"].includes(low)) { conv.state = ""; conv.d = {}; return menu("Tudo bem, voltei ao início. Como posso ajudar?"); }
+  if (t === "cancelar_reserva" || (/cancel|desist/.test(low) && /reserva|pedido|hospedagem/.test(low))) return cancelarInicio();
+  if (conv.state === "cancelar") return cancelar(t, low);
 
-  if (s === "datas") {
-    const ds = lerDatas(t);
-    if (!ds) return texto("Não entendi as datas 😅 Me mande assim: 14/11 a 16/11 (entrada e saída).");
-    const [a, b] = ds;
-    conv.state = "hospedes"; conv.d = { a: +a, b: +b };
-    return lista(`Entrada ${dm(a)} e saída ${dm(b)}: ${noites(conv.d)} noite(s). Quantos hóspedes?`, "Escolher",
-      [1, 2, 3, 4, 5].map(n => [String(n), `${n} pessoa${n > 1 ? "s" : ""}`]));
-  }
-  if (s === "hospedes") {
-    const m = t.match(/\d/);
-    if (!m || +m[0] < 1 || +m[0] > 5) return texto("Me diga o número de hóspedes, de 1 a 5.");
-    d.g = +m[0]; conv.state = "quarto";
-    const n = noites(d);
-    return lista(`Para ${d.g} pessoa(s) e ${n} noite(s), estes quartos cabem:`, "Ver quartos",
-      Object.entries(QUARTOS).filter(([, q]) => d.g <= q.max).map(([k, q]) => [k, q.nome, `Total ${brl(calcular(k, n, d.g, false)[0])} · até ${q.max} pessoas`]));
-  }
-  if (s === "quarto") {
-    const k = QUARTOS[t] ? t : Object.keys(QUARTOS).find(k => low.includes(QUARTOS[k].nome.toLowerCase()));
-    if (!k || d.g > QUARTOS[k].max) return texto("Escolha um dos quartos da lista, por favor.");
-    d.q = k; conv.state = "pet";
-    return botoes("Vai levar pet de pequeno porte?", [["pet_sim", "Sim, vou levar"], ["pet_nao", "Não"]]);
-  }
-  if (s === "pet") {
-    if (!["pet_sim", "pet_nao"].includes(t) && !/^(sim|s|não|nao|n)\b/.test(low))
-      return botoes("É só tocar numa opção: vai levar pet?", [["pet_sim", "Sim, vou levar"], ["pet_nao", "Não"]]);
-    d.pet = t === "pet_sim" || low.startsWith("s");
-    const n = noites(d); [d.total, d.sinal] = calcular(d.q, n, d.g, d.pet);
-    conv.state = "confirmar";
-    return botoes(`Resumo do pedido:\n🛏️ ${QUARTOS[d.q].nome}\n📅 ${dm(new Date(d.a))} a ${dm(new Date(d.b))} (${n} noites)\n👥 ${d.g} hóspede(s)${d.pet ? " + pet" : ""}\n💰 Total: ${brl(d.total)}\nSinal para confirmar (30%): ${brl(d.sinal)}`,
-      [["ok", "Confirmar pedido"], ["refazer", "Mudar dados"]]);
-  }
-  if (s === "confirmar") {
-    if (t === "refazer") { conv.state = "datas"; conv.d = {}; return texto("Sem problema! Me mande de novo as datas: ex. 14/11 a 16/11."); }
-    if (t !== "ok" && !/^(sim|confirm)/.test(low)) return botoes("Posso registrar o pedido?", [["ok", "Confirmar pedido"], ["refazer", "Mudar dados"]]);
-    const p = { id: pedidos.length + 1, ...d, status: "Aguardando sinal", novo: true };
-    pedidos.unshift(p); conv.state = ""; conv.d = {};
-    painel(); registrar(`Novo pedido nº ${p.id}: ${QUARTOS[p.q].nome}, ${brl(p.total)}`); avisar();
-    return texto(`Pedido nº ${p.id} registrado ✅\nPara garantir a data, faça o Pix do sinal de ${brl(p.sinal)}:\nChave Pix: ${PIX}\nAssim que a recepção confirmar o pagamento, envio a confirmação por aqui.`);
+  if (conv.state === "reserva") {
+    if (conv.ask === "confirmar") {
+      if (t === "refazer" || /mudar|trocar|alterar/.test(low)) { conv.d = {}; return proximo(); }
+      if (t === "ok" || /^(sim|confirm|pode|ok)/.test(low)) {
+        const p = { id: pedidos.length + 1, ...d, status: "Aguardando sinal", novo: true };
+        pedidos.unshift(p); conv.state = ""; conv.d = {};
+        painel(); registrar(`Novo pedido nº ${p.id}: ${QUARTOS[p.q].nome}, ${brl(p.total)}`); avisar();
+        return texto(`Pedido nº ${p.id} registrado ✅\nPara garantir a data, faça o Pix do sinal de ${brl(p.sinal)}:\nChave Pix: ${PIX}\nAssim que a recepção confirmar o pagamento, envio a confirmação por aqui.`);
+      }
+    }
+    const r = conv.ask === "quarto" && QUARTOS[t] ? { q: t } : entender(t);  // id da lista ("casal") não é "um casal"
+    if (conv.ask === "hospedes" && !r.g && /^\s*\d+\s*$/.test(t)) r.g = +t;
+    if (conv.ask === "quarto" && !r.q) { const k = Object.keys(QUARTOS).find(k => low.includes(QUARTOS[k].nome.toLowerCase())); if (k) r.q = k; }
+    if (conv.ask === "pet" && r.pet === undefined) {
+      if (t === "pet_sim" || /^(sim|s|vou)\b/.test(low)) r.pet = true;
+      else if (t === "pet_nao" || /^(n[aã]o|n)\b/.test(low)) r.pet = false;
+    }
+    if (Object.keys(r).length) { Object.assign(d, r); return proximo(); }
+    if (low === "cancelar" || /desisti|deixa pra l[aá]/.test(low)) { conv.state = ""; conv.d = {}; return texto("Tudo bem, deixei a reserva de lado. Se precisar, é só chamar 🙂"); }
+    const faq = intencao(t);
+    if (FAQ[faq]) { texto(FAQ[faq]); return proximo(); }  // responde a dúvida e retoma a reserva
+    if (faq === "atendente") { conv.state = ""; conv.d = {}; }
+    else { texto(conv.ask === "datas" ? "Não entendi as datas 😅 Pode mandar assim: 14/11 a 16/11." : "Não entendi 😅"); return proximo(); }
   }
 
+  const r = entender(t);
   const acao = MENU.some(([i]) => i === t) ? t : intencao(t);
+  if (Object.keys(r).length && acao !== "atendente") {  // já veio com datas, pessoas, pet ou quarto: vai direto para a reserva
+    conv.d = r; conv.greeted = true;
+    const e = entendi(r); if (e) texto(e);
+    return proximo();
+  }
+  if (acao === "cancelamento") {
+    texto(FAQ.cancelamento);
+    return ativos().length ? botoes("Quer cancelar uma reserva sua?", [["cancelar_reserva", "Cancelar reserva"], ["menu", "Não, só queria saber"]])
+      : botoes("Posso ajudar com mais alguma coisa?", [["reservar", "Fazer uma reserva"], ["menu", "Outras dúvidas"]]);
+  }
   if (FAQ[acao]) { texto(FAQ[acao]); return botoes("Quer fazer uma reserva?", [["reservar", "Sim, reservar"], ["menu", "Outras dúvidas"]]); }
-  if (acao === "reservar") { conv.state = "datas"; conv.d = {}; return texto("Ótimo! Quais as datas de entrada e saída? Ex.: 14/11 a 16/11"); }
+  if (acao === "reservar") { conv.d = {}; conv.greeted = true; return proximo(); }
   if (acao === "atendente") {
     conv.human = true; humano(); registrar("<b>Hóspede pediu atendente.</b> O robô parou de responder."); avisar();
     return texto("Certo! Passei sua conversa para a recepção. Alguém responde por aqui em instantes 🙂");
   }
-  const intro = conv.greeted ? "Posso ajudar só com assuntos da pousada 🙂 Escolha uma opção:" : "Olá! 👋 Sou o atendente virtual da Pousada Remanso do Rio.";
+  const intro = conv.greeted ? "Posso ajudar só com assuntos da pousada 🙂 Escolha uma opção ou escreva o que precisa:"
+    : "Olá! 👋 Sou o atendente virtual da Pousada Remanso do Rio. Pode escrever do seu jeito, ex.: \"quarto pra 2 de 14/11 a 16/11\", ou escolher uma opção:";
   conv.greeted = true;
   return menu(intro);
 }
@@ -382,11 +474,11 @@ function registrar(html) { const d = document.createElement("div"); d.innerHTML 
 function painel() {
   $("ped").innerHTML = pedidos.map(p => `<tr class="${p.novo ? "new" : ""}"><td>${p.id}</td><td>${QUARTOS[p.q].nome}</td>
     <td>${dm(new Date(p.a))} a ${dm(new Date(p.b))}</td><td>${brl(p.total)}</td><td>${brl(p.sinal)}</td>
-    <td><span class="st ${p.status === "Confirmada" ? "ok" : "warn"}">${p.status}</span></td>
-    <td>${p.status === "Confirmada" ? "" : `<button class="btn" data-sinal="${p.id}">Sinal recebido</button>`}</td></tr>`).join("");
+    <td><span class="st ${p.status === "Confirmada" ? "ok" : p.status === "Cancelada" ? "cx" : "warn"}">${p.status}${p.obs ? " · " + p.obs : ""}</span></td>
+    <td>${p.status === "Aguardando sinal" ? `<button class="btn" data-sinal="${p.id}">Sinal recebido</button>` : ""}</td></tr>`).join("");
   $("pedEmpty").hidden = pedidos.length > 0;
   $("tPed").textContent = pedidos.length;
-  $("tPend").textContent = pedidos.filter(p => p.status !== "Confirmada").length;
+  $("tPend").textContent = pedidos.filter(p => p.status === "Aguardando sinal").length;
   $("tRev").textContent = brl(pedidos.filter(p => p.status === "Confirmada").reduce((s, p) => s + p.total, 0));
   document.querySelectorAll("[data-sinal]").forEach(b => b.onclick = () => {
     const p = pedidos.find(x => x.id === +b.dataset.sinal);
