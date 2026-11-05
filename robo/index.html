@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teste o Robô · Remanso do Rio</title>
+<meta name="description" content="Simulador do atendimento automático no WhatsApp de uma pousada fictícia: tire dúvidas, faça uma reserva e veja o pedido chegar no painel do dono.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: faixa demonstrativa, título curto, e lado a lado um celular com a conversa do WhatsApp e o painel do dono. No celular, viram duas abas. A lógica é a mesma do robô Python (bot/app.py). */
+:root{
+  --bg:#F5F1E8; --surface:#FFFDF8; --ink:#17201B; --muted:#5E665F; --line:#E4DDCF;
+  --forest:#1F4D3A; --forest-ink:#F5F1E8; --sun:#D9822B; --sun-ink:#2A1606; --soft:#EBE4D5;
+  --ok:#1D7A4A; --warn:#A8620B; --info:#2E6FA8;
+  --wa-head:#008069; --wa-bg:#EFEAE2; --wa-in:#FFFFFF; --wa-out:#D9FDD3; --wa-ink:#111B21; --wa-muted:#667781; --wa-link:#027EB5;
+  --font-display:"Fraunces",Georgia,serif; --font-body:"Manrope","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1612; --surface:#161F1A; --ink:#EEF1EC; --muted:#A3AEA6; --line:#26322B;
+  --forest:#7FC4A1; --forest-ink:#0F1612; --sun:#F0A24A; --soft:#1C2721;
+  --ok:#5BC48A; --warn:#E7A23D; --info:#6AA8DE;
+  --wa-head:#202C33; --wa-bg:#0B141A; --wa-in:#202C33; --wa-out:#005C4B; --wa-ink:#E9EDEF; --wa-muted:#8696A0; --wa-link:#53BDEB; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0F1612; --surface:#161F1A; --ink:#EEF1EC; --muted:#A3AEA6; --line:#26322B;
+  --forest:#7FC4A1; --forest-ink:#0F1612; --sun:#F0A24A; --soft:#1C2721;
+  --ok:#5BC48A; --warn:#E7A23D; --info:#6AA8DE;
+  --wa-head:#202C33; --wa-bg:#0B141A; --wa-in:#202C33; --wa-out:#005C4B; --wa-ink:#E9EDEF; --wa-muted:#8696A0; --wa-link:#53BDEB; color-scheme:dark;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.5}
+h1,h2{font-family:var(--font-display);font-weight:600;margin:0;line-height:1.1}
+p{margin:0}
+a{color:inherit}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:8px}
+.demo-bar{background:var(--forest);color:var(--forest-ink);text-align:center;font-size:.82rem;font-weight:600;padding:7px 12px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+header.top{padding:24px 0 16px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
+header.top h1{font-size:clamp(1.7rem,4vw,2.4rem)}
+header.top p{color:var(--muted);max-width:60ch;margin-top:6px}
+.back{font-size:.9rem;font-weight:700;text-decoration:none;border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;background:var(--surface)}
+
+.tabs{display:none;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:10px;font-weight:700;cursor:pointer;position:relative}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.badge{position:absolute;top:-6px;right:10px;background:var(--sun);color:var(--sun-ink);border-radius:999px;font-size:.72rem;padding:1px 7px}
+.badge[hidden]{display:none}
+.grid{display:grid;grid-template-columns:400px 1fr;gap:24px;align-items:start;padding-bottom:40px}
+.grid>*{min-width:0}
+@media (max-width:900px){.tabs{display:flex}.grid{grid-template-columns:1fr}.grid>[hidden]{display:none}}
+
+/* celular */
+.phone{background:#0B141A;border-radius:36px;padding:10px;box-shadow:0 30px 60px -25px rgba(0,0,0,.55);position:sticky;top:12px}
+@media (max-width:900px){.phone{position:static;border-radius:24px;padding:6px}}
+.screen{border-radius:28px;overflow:hidden;display:flex;flex-direction:column;height:min(720px,calc(100dvh - 120px));background:var(--wa-bg);position:relative}
+@media (max-width:900px){.screen{border-radius:20px;height:calc(100dvh - 262px);min-height:400px}header.top{padding:14px 0 10px}header.top p{display:none}}
+.wa-head{background:var(--wa-head);color:#fff;display:flex;align-items:center;gap:10px;padding:12px 14px}
+.wa-head i{width:38px;height:38px;border-radius:50%;background:#E3A51C;display:grid;place-items:center;font:700 1rem var(--font-display);font-style:normal;color:#3A2A05;flex:none}
+.wa-head b{display:block;font-size:.98rem}
+.wa-head small{display:block;font-size:.76rem;opacity:.85}
+.msgs{flex:1;overflow-y:auto;padding:12px 10px;display:flex;flex-direction:column;gap:6px;font-size:.92rem;color:var(--wa-ink)}
+.msgs::before{content:"";flex:1 0 0}
+.pill{align-self:center;background:color-mix(in srgb,var(--wa-in) 85%,transparent);color:var(--wa-muted);font-size:.74rem;border-radius:8px;padding:4px 10px;text-align:center;max-width:90%}
+.bub{max-width:82%;padding:7px 9px 5px;border-radius:9px;box-shadow:0 1px .5px rgba(0,0,0,.13);white-space:pre-line;word-wrap:break-word;animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.bub.in{align-self:flex-start;background:var(--wa-in);border-top-left-radius:2px}
+.bub.out{align-self:flex-end;background:var(--wa-out);border-top-right-radius:2px}
+.bub .who{display:block;font-size:.74rem;font-weight:800;color:var(--warn);margin-bottom:2px}
+.meta{display:block;text-align:right;font-size:.68rem;color:var(--wa-muted);margin-top:2px}
+.tick{color:var(--wa-muted);margin-left:3px;letter-spacing:-3px}
+.tick.read{color:#53BDEB}
+.bub-actions{display:grid;gap:1px;margin:6px -9px -5px;border-top:1px solid color-mix(in srgb,var(--wa-muted) 25%,transparent)}
+.bub-actions button{background:none;border:0;color:var(--wa-link);font-weight:600;padding:9px;cursor:pointer;border-bottom:1px solid color-mix(in srgb,var(--wa-muted) 18%,transparent)}
+.bub-actions button:last-child{border-bottom:0}
+.bub-actions button:disabled{color:var(--wa-muted);cursor:default}
+.typing{align-self:flex-start;background:var(--wa-in);border-radius:9px;padding:10px 12px;display:flex;gap:4px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--wa-muted);animation:blink 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes blink{50%{opacity:.25}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 10px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips[hidden]{display:none}
+.chips button{flex:none;border:1px solid color-mix(in srgb,var(--wa-muted) 40%,transparent);background:var(--wa-in);color:var(--wa-ink);border-radius:999px;padding:6px 12px;font-size:.84rem;cursor:pointer}
+form.bar{display:flex;gap:8px;padding:8px 10px 10px}
+form.bar input{flex:1;min-width:0;border:0;border-radius:999px;padding:11px 16px;background:var(--wa-in);color:var(--wa-ink);font:inherit;font-size:.95rem}
+form.bar input:focus{outline:2px solid var(--wa-head)}
+form.bar button{width:44px;height:44px;border-radius:50%;border:0;background:#00A884;color:#fff;cursor:pointer;display:grid;place-items:center;flex:none}
+.sheet{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+.sheet[hidden]{display:none}
+.sheet .box{background:var(--wa-in);color:var(--wa-ink);width:100%;border-radius:18px 18px 0 0;padding:14px 0 8px;max-height:75%;overflow-y:auto;animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(40%)}}
+.sheet h3{margin:0 16px 8px;font:700 1rem var(--font-body)}
+.sheet .row{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid color-mix(in srgb,var(--wa-muted) 18%,transparent);padding:11px 16px;color:var(--wa-ink);cursor:pointer}
+.sheet .row small{display:block;color:var(--wa-muted);font-size:.8rem}
+.sheet .row:hover{background:color-mix(in srgb,var(--wa-muted) 10%,transparent)}
+
+/* painel */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.panel-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--soft)}
+.panel-top b{font-family:var(--font-display);font-size:1.1rem}
+.chip{font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.tile{background:var(--surface);padding:14px 18px}
+.tile span{display:block;font-size:.78rem;color:var(--muted);font-weight:600}
+.tile b{font:600 1.6rem var(--font-display);font-variant-numeric:tabular-nums}
+.sec{padding:16px 18px;border-top:1px solid var(--line)}
+.sec h2{font-size:1.1rem;margin-bottom:10px}
+.empty{color:var(--muted);font-size:.92rem}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle;font-variant-numeric:tabular-nums}
+tr.new td{background:color-mix(in srgb,var(--sun) 14%,transparent)}
+.st{display:inline-block;font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:999px}
+.st.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.st.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.btn{border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.84rem;cursor:pointer;background:var(--forest);color:var(--forest-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.human{border:1.5px solid var(--sun);border-radius:14px;padding:12px;display:grid;gap:8px}
+.human form{display:flex;gap:8px;flex-wrap:wrap}
+.human input{flex:1;min-width:160px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px 12px;font:inherit}
+.log{max-height:220px;overflow-y:auto;display:grid;gap:4px;font-size:.84rem}
+.log div{color:var(--muted)}
+.log b{color:var(--ink)}
+.how{font-size:.86rem;color:var(--muted);background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:4px}
+.how b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="demo-bar">Modelo demonstrativo · pousada fictícia · simulação do atendimento no WhatsApp</div>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Teste o robô de atendimento</h1>
+      <p>Converse como se fosse um hóspede: tire dúvidas e faça uma reserva. Depois, no painel, marque o sinal como recebido e veja a confirmação chegar.</p>
+    </div>
+    <a class="back" href="../">← Voltar ao portfólio</a>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Escolha a tela">
+    <button role="tab" id="tabChat" aria-controls="chatCol" aria-selected="true">Conversa</button>
+    <button role="tab" id="tabPanel" aria-controls="panelCol" aria-selected="false">Painel do dono <span class="badge" id="badge" hidden>1</span></button>
+  </div>
+
+  <div class="grid">
+    <section id="chatCol" role="tabpanel" aria-labelledby="tabChat">
+      <div class="phone">
+        <div class="screen">
+          <div class="wa-head"><i aria-hidden="true">R</i><div><b>Pousada Remanso do Rio</b><small id="status">online</small></div></div>
+          <div class="msgs" id="msgs" aria-live="polite">
+            <div class="pill">🔒 Conversa de demonstração. Mande uma mensagem para começar.</div>
+          </div>
+          <div class="chips" id="chips">
+            <button type="button">Oi</button><button type="button">Quanto custa a diária?</button><button type="button">Quero reservar</button><button type="button">Aceita pet?</button>
+          </div>
+          <form class="bar" id="bar"><input id="inp" placeholder="Mensagem" autocomplete="off" aria-label="Sua mensagem"><button aria-label="Enviar"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5 21 12 3 3.5l.01 6.6L15 12 3.01 13.9z"/></svg></button></form>
+          <div class="sheet" id="sheet" hidden><div class="box" role="dialog" aria-label="Opções"><h3 id="sheetTitle"></h3><div id="sheetRows"></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panelCol" role="tabpanel" aria-labelledby="tabPanel">
+      <div class="panel">
+        <div class="panel-top"><b>Remanso do Rio · Painel do dono</b><span class="chip">Dados desta simulação</span></div>
+        <div class="tiles">
+          <div class="tile"><span>Pedidos</span><b id="tPed">0</b></div>
+          <div class="tile"><span>Aguardando sinal</span><b id="tPend">0</b></div>
+          <div class="tile"><span>Receita confirmada</span><b id="tRev">R$ 0</b></div>
+        </div>
+        <div class="sec">
+          <h2>Pedidos de reserva</h2>
+          <div class="tbl"><table><thead><tr><th>Nº</th><th>Quarto</th><th>Período</th><th>Total</th><th>Sinal</th><th>Status</th><th></th></tr></thead><tbody id="ped"></tbody></table></div>
+          <p class="empty" id="pedEmpty">Nenhum pedido ainda. Faça uma reserva na conversa.</p>
+        </div>
+        <div class="sec">
+          <h2>Atendimento humano</h2>
+          <div id="humanBox"><p class="empty">Ninguém pediu atendente. Escreva "falar com atendente" na conversa para testar.</p></div>
+        </div>
+        <div class="sec">
+          <h2>Atividade</h2>
+          <div class="log" id="log"><div>O robô está online e responde na hora, 24h.</div></div>
+          <p class="how"><b>No projeto real</b>, esta mesma conversa acontece no WhatsApp da pousada, pela API oficial da Meta, e o painel fica num endereço só do dono.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+// Mesma lógica do robô Python (bot/app.py), rodando no navegador para a demonstração.
+const QUARTOS = {
+  casal: { nome: "Standard Casal", preco: 180, base: 2, max: 3 },
+  familia: { nome: "Família", preco: 260, base: 4, max: 5 },
+  varanda: { nome: "Suíte com Varanda", preco: 320, base: 2, max: 3 },
+};
+const EXTRA = 50, PET = 30, SINAL = 0.3, PIX = "pix-de-teste@remansodorio.exemplo";
+const brl = v => "R$ " + v.toLocaleString("pt-BR");
+const FAQ = {
+  precos: "Diárias com café da manhã incluso:\n" + Object.values(QUARTOS).map(q => `• ${q.nome}: ${brl(q.preco)}`).join("\n") + `\nHóspede adicional acima da capacidade base: ${brl(EXTRA)} por noite.`,
+  horarios: "Check-in a partir das 14h e check-out até 12h. Café da manhã das 6h30 às 9h30, incluso na diária.",
+  pets: `Aceitamos pets de pequeno porte, com taxa de ${brl(PET)} por estadia. É só avisar na reserva.`,
+  pagamento: "Para confirmar a reserva pedimos sinal de 30% via Pix. O restante é pago no check-in, em Pix, débito ou crédito em até 3x.",
+  cancelamento: "Cancelando com 7 dias ou mais de antecedência, devolvemos o sinal. Com menos de 7 dias, o sinal vira crédito para outra data em até 6 meses.",
+  local: "Rua das Palmeiras, 120 · Beira-Rio (endereço ilustrativo). 5 min do centro e 12 min da rodoviária. Estacionamento grátis.",
+};
+const PALAVRAS = [
+  ["atendente", ["atendente", "humano", "pessoa", "recepção", "recepcao", "falar com"]],
+  ["reservar", ["reserv", "disponib", "vaga"]],
+  ["precos", ["preço", "preco", "valor", "diária", "diaria", "quanto", "custa"]],
+  ["horarios", ["check", "horário", "horario", "café", "cafe"]],
+  ["pets", ["pet", "cachorro", "gato", "animal"]],
+  ["pagamento", ["pagamento", "pagar", "pix", "cartão", "cartao", "parcel"]],
+  ["cancelamento", ["cancel"]],
+  ["local", ["endereço", "endereco", "onde", "chegar", "localiza", "estacionamento"]],
+];
+const MENU = [["precos", "Preços e quartos", "Diárias com café incluso"], ["reservar", "Fazer uma reserva", "Calculo o total na hora"],
+  ["horarios", "Check-in e café"], ["pets", "Aceita pets?"], ["pagamento", "Formas de pagamento"], ["cancelamento", "Cancelamento"],
+  ["local", "Como chegar"], ["atendente", "Falar com a recepção"]];
+
+const $ = id => document.getElementById(id);
+const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let conv = { state: "", d: {}, human: false, greeted: false };
+const pedidos = [];
+
+// ---------- conversa ----------
+const hora = () => new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+function scroll() { $("msgs").scrollTop = $("msgs").scrollHeight; }
+function bubble(cls, text, who) {
+  const b = document.createElement("div");
+  b.className = "bub " + cls;
+  if (who) { const w = document.createElement("span"); w.className = "who"; w.textContent = who; b.append(w); }
+  b.append(document.createTextNode(text));
+  const m = document.createElement("span"); m.className = "meta"; m.textContent = hora();
+  if (cls === "out") { const t = document.createElement("span"); t.className = "tick"; t.textContent = "✓✓"; m.append(t); }
+  b.append(m); $("msgs").append(b); scroll();
+  return b;
+}
+let fila = Promise.resolve();
+function enviar(msg) {  // o robô "digita" antes de cada resposta
+  fila = fila.then(() => new Promise(ok => {
+    document.querySelectorAll(".tick:not(.read)").forEach(t => t.classList.add("read"));
+    $("status").textContent = "digitando...";
+    const t = document.createElement("div"); t.className = "typing"; t.innerHTML = "<span></span><span></span><span></span>";
+    $("msgs").append(t); scroll();
+    setTimeout(() => {
+      t.remove(); $("status").textContent = "online";
+      const b = bubble("in", msg.body, msg.who);
+      if (msg.opts) {
+        const box = document.createElement("div"); box.className = "bub-actions";
+        msg.opts.forEach(([id, title]) => {
+          const bt = document.createElement("button"); bt.type = "button"; bt.textContent = title;
+          bt.onclick = () => { box.querySelectorAll("button").forEach(x => x.disabled = true); falar(title, id); };
+          box.append(bt);
+        });
+        b.insertBefore(box, b.querySelector(".meta"));
+      }
+      if (msg.rows) {
+        const box = document.createElement("div"); box.className = "bub-actions";
+        const bt = document.createElement("button"); bt.type = "button"; bt.textContent = "☰ " + msg.btn;
+        bt.onclick = () => abrirLista(msg);
+        box.append(bt); b.insertBefore(box, b.querySelector(".meta"));
+      }
+      ok();
+    }, calm ? 50 : Math.min(1400, 450 + msg.body.length * 6));
+  }));
+}
+const texto = (body, who) => enviar({ body, who });
+const botoes = (body, opts) => enviar({ body, opts });
+const lista = (body, btn, rows) => enviar({ body, btn, rows });
+function abrirLista(msg) {
+  $("sheetTitle").textContent = msg.btn;
+  $("sheetRows").innerHTML = "";
+  msg.rows.forEach(([id, title, desc]) => {
+    const r = document.createElement("button"); r.type = "button"; r.className = "row"; r.textContent = title;
+    if (desc) { const s = document.createElement("small"); s.textContent = desc; r.append(s); }
+    r.onclick = () => { $("sheet").hidden = true; falar(title, id); };
+    $("sheetRows").append(r);
+  });
+  $("sheet").hidden = false;
+  $("sheetRows").querySelector("button").focus();
+}
+$("sheet").addEventListener("click", e => { if (e.target === $("sheet")) $("sheet").hidden = true; });
+addEventListener("keydown", e => { if (e.key === "Escape") $("sheet").hidden = true; });
+
+function falar(visivel, payload) {
+  bubble("out", visivel);
+  $("chips").hidden = true;
+  responder(payload ?? visivel);
+}
+$("bar").addEventListener("submit", e => { e.preventDefault(); const v = $("inp").value.trim(); if (!v) return; $("inp").value = ""; falar(v); });
+$("chips").querySelectorAll("button").forEach(b => b.onclick = () => falar(b.textContent));
+
+// ---------- regras do robô ----------
+const menu = intro => lista(intro, "Ver opções", MENU);
+const intencao = t => (PALAVRAS.find(([, ps]) => ps.some(p => t.toLowerCase().includes(p))) || [])[0];
+const hoje = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const dm = d => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+const noites = d => Math.round((new Date(d.b) - new Date(d.a)) / 864e5);
+function lerDatas(t) {
+  const ach = [...t.matchAll(/(\d{1,2})\/(\d{1,2})/g)].slice(0, 2);
+  if (ach.length < 2) return null;
+  const h = hoje(), ds = [];
+  for (const [, d, m] of ach) {
+    const x = new Date(h.getFullYear(), +m - 1, +d);
+    if (x.getMonth() !== +m - 1 || x.getDate() !== +d) return null;  // 31/02 e afins
+    if (x < h) x.setFullYear(x.getFullYear() + 1);
+    ds.push(x);
+  }
+  let [a, b] = ds;
+  if (b <= a) { const b2 = new Date(b); b2.setFullYear(b.getFullYear() + 1); if (b2 > a) b = b2; }
+  return (b - a) / 864e5 >= 1 ? [a, b] : null;
+}
+function calcular(q, n, g, pet) {
+  const Q = QUARTOS[q], total = Q.preco * n + Math.max(0, g - Q.base) * EXTRA * n + (pet ? PET : 0);
+  return [total, Math.round(total * SINAL)];
+}
+
+function responder(t) {
+  if (conv.human) { registrar(`<b>Hóspede:</b> ${esc(t)}`); return; }
+  t = t.trim();
+  const low = t.toLowerCase(), s = conv.state, d = conv.d;
+  if (["menu", "sair", "cancelar", "voltar", "início", "inicio"].includes(low)) { conv.state = ""; conv.d = {}; return menu("Tudo bem, voltei ao início. Como posso ajudar?"); }
+
+  if (s === "datas") {
+    const ds = lerDatas(t);
+    if (!ds) return texto("Não entendi as datas 😅 Me mande assim: 14/11 a 16/11 (entrada e saída).");
+    const [a, b] = ds;
+    conv.state = "hospedes"; conv.d = { a: +a, b: +b };
+    return lista(`Entrada ${dm(a)} e saída ${dm(b)}: ${noites(conv.d)} noite(s). Quantos hóspedes?`, "Escolher",
+      [1, 2, 3, 4, 5].map(n => [String(n), `${n} pessoa${n > 1 ? "s" : ""}`]));
+  }
+  if (s === "hospedes") {
+    const m = t.match(/\d/);
+    if (!m || +m[0] < 1 || +m[0] > 5) return texto("Me diga o número de hóspedes, de 1 a 5.");
+    d.g = +m[0]; conv.state = "quarto";
+    const n = noites(d);
+    return lista(`Para ${d.g} pessoa(s) e ${n} noite(s), estes quartos cabem:`, "Ver quartos",
+      Object.entries(QUARTOS).filter(([, q]) => d.g <= q.max).map(([k, q]) => [k, q.nome, `Total ${brl(calcular(k, n, d.g, false)[0])} · até ${q.max} pessoas`]));
+  }
+  if (s === "quarto") {
+    const k = QUARTOS[t] ? t : Object.keys(QUARTOS).find(k => low.includes(QUARTOS[k].nome.toLowerCase()));
+    if (!k || d.g > QUARTOS[k].max) return texto("Escolha um dos quartos da lista, por favor.");
+    d.q = k; conv.state = "pet";
+    return botoes("Vai levar pet de pequeno porte?", [["pet_sim", "Sim, vou levar"], ["pet_nao", "Não"]]);
+  }
+  if (s === "pet") {
+    if (!["pet_sim", "pet_nao"].includes(t) && !/^(sim|s|não|nao|n)\b/.test(low))
+      return botoes("É só tocar numa opção: vai levar pet?", [["pet_sim", "Sim, vou levar"], ["pet_nao", "Não"]]);
+    d.pet = t === "pet_sim" || low.startsWith("s");
+    const n = noites(d); [d.total, d.sinal] = calcular(d.q, n, d.g, d.pet);
+    conv.state = "confirmar";
+    return botoes(`Resumo do pedido:\n🛏️ ${QUARTOS[d.q].nome}\n📅 ${dm(new Date(d.a))} a ${dm(new Date(d.b))} (${n} noites)\n👥 ${d.g} hóspede(s)${d.pet ? " + pet" : ""}\n💰 Total: ${brl(d.total)}\nSinal para confirmar (30%): ${brl(d.sinal)}`,
+      [["ok", "Confirmar pedido"], ["refazer", "Mudar dados"]]);
+  }
+  if (s === "confirmar") {
+    if (t === "refazer") { conv.state = "datas"; conv.d = {}; return texto("Sem problema! Me mande de novo as datas: ex. 14/11 a 16/11."); }
+    if (t !== "ok" && !/^(sim|confirm)/.test(low)) return botoes("Posso registrar o pedido?", [["ok", "Confirmar pedido"], ["refazer", "Mudar dados"]]);
+    const p = { id: pedidos.length + 1, ...d, status: "Aguardando sinal", novo: true };
+    pedidos.unshift(p); conv.state = ""; conv.d = {};
+    painel(); registrar(`Novo pedido nº ${p.id}: ${QUARTOS[p.q].nome}, ${brl(p.total)}`); avisar();
+    return texto(`Pedido nº ${p.id} registrado ✅\nPara garantir a data, faça o Pix do sinal de ${brl(p.sinal)}:\nChave Pix: ${PIX}\nAssim que a recepção confirmar o pagamento, envio a confirmação por aqui.`);
+  }
+
+  const acao = MENU.some(([i]) => i === t) ? t : intencao(t);
+  if (FAQ[acao]) { texto(FAQ[acao]); return botoes("Quer fazer uma reserva?", [["reservar", "Sim, reservar"], ["menu", "Outras dúvidas"]]); }
+  if (acao === "reservar") { conv.state = "datas"; conv.d = {}; return texto("Ótimo! Quais as datas de entrada e saída? Ex.: 14/11 a 16/11"); }
+  if (acao === "atendente") {
+    conv.human = true; humano(); registrar("<b>Hóspede pediu atendente.</b> O robô parou de responder."); avisar();
+    return texto("Certo! Passei sua conversa para a recepção. Alguém responde por aqui em instantes 🙂");
+  }
+  const intro = conv.greeted ? "Posso ajudar só com assuntos da pousada 🙂 Escolha uma opção:" : "Olá! 👋 Sou o atendente virtual da Pousada Remanso do Rio.";
+  conv.greeted = true;
+  return menu(intro);
+}
+
+// ---------- painel ----------
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function registrar(html) { const d = document.createElement("div"); d.innerHTML = `${hora()} · ${html}`; $("log").prepend(d); }
+function painel() {
+  $("ped").innerHTML = pedidos.map(p => `<tr class="${p.novo ? "new" : ""}"><td>${p.id}</td><td>${QUARTOS[p.q].nome}</td>
+    <td>${dm(new Date(p.a))} a ${dm(new Date(p.b))}</td><td>${brl(p.total)}</td><td>${brl(p.sinal)}</td>
+    <td><span class="st ${p.status === "Confirmada" ? "ok" : "warn"}">${p.status}</span></td>
+    <td>${p.status === "Confirmada" ? "" : `<button class="btn" data-sinal="${p.id}">Sinal recebido</button>`}</td></tr>`).join("");
+  $("pedEmpty").hidden = pedidos.length > 0;
+  $("tPed").textContent = pedidos.length;
+  $("tPend").textContent = pedidos.filter(p => p.status !== "Confirmada").length;
+  $("tRev").textContent = brl(pedidos.filter(p => p.status === "Confirmada").reduce((s, p) => s + p.total, 0));
+  document.querySelectorAll("[data-sinal]").forEach(b => b.onclick = () => {
+    const p = pedidos.find(x => x.id === +b.dataset.sinal);
+    p.status = "Confirmada"; p.novo = false; painel(); registrar(`Sinal do pedido nº ${p.id} marcado como recebido.`);
+    texto(`Sinal recebido! 🎉 Sua reserva nº ${p.id} está confirmada: ${QUARTOS[p.q].nome}, de ${dm(new Date(p.a))} a ${dm(new Date(p.b))}.\nCheck-in a partir das 14h. Um dia antes eu te mando a localização. Até breve!`);
+    mostrar("chat");
+  });
+}
+function humano() {
+  if (!conv.human) { $("humanBox").innerHTML = '<p class="empty">Ninguém aguardando a recepção.</p>'; return; }
+  $("humanBox").innerHTML = `<div class="human"><b>Um hóspede pediu para falar com a recepção.</b>
+    <form id="hForm"><input id="hInp" placeholder="Sua resposta como recepção" required><button class="btn">Enviar</button></form>
+    <div><button class="btn ghost" id="hBack" type="button">Devolver ao robô</button></div></div>`;
+  $("hForm").onsubmit = e => { e.preventDefault(); const v = $("hInp").value.trim(); if (!v) return; $("hInp").value = ""; texto(v, "Recepção"); registrar(`<b>Recepção:</b> ${esc(v)}`); mostrar("chat"); };
+  $("hBack").onclick = () => { conv.human = false; humano(); registrar("Conversa devolvida ao robô."); texto("Voltei! Sou o atendente virtual. Se precisar de algo, é só escrever 🙂"); mostrar("chat"); };
+}
+
+// ---------- abas (celular) ----------
+const mobile = matchMedia("(max-width: 900px)");
+function mostrar(qual) {
+  if (!mobile.matches) return;
+  const chat = qual === "chat";
+  $("chatCol").hidden = !chat; $("panelCol").hidden = chat;
+  $("tabChat").setAttribute("aria-selected", chat); $("tabPanel").setAttribute("aria-selected", !chat);
+  if (!chat) $("badge").hidden = true;
+}
+function avisar() { if (mobile.matches && !$("chatCol").hidden) $("badge").hidden = false; }
+$("tabChat").onclick = () => mostrar("chat");
+$("tabPanel").onclick = () => mostrar("panel");
+mobile.addEventListener("change", () => { $("chatCol").hidden = false; $("panelCol").hidden = mobile.matches; });
+$("panelCol").hidden = mobile.matches;
+</script>
+</body>
+</html>

@@ -3,3 +3,8 @@ img/*/original/
 CLAUDE.md
 __pycache__/
 precos.html
+bot/.env
+bot/.venv/
+bot/*.db
+bot/__pycache__/
+bot/*.log
