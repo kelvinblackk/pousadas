@@ -57,14 +57,14 @@ section{padding:96px 0;position:relative}
 /* menu flutuante */
 .nav{position:fixed;top:14px;left:50%;translate:-50% 0;z-index:50;width:min(1100px,calc(100% - 24px));display:flex;align-items:center;gap:18px;padding:8px 8px 8px 16px;border-radius:999px;background:color-mix(in srgb,var(--surface) 72%,transparent);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border:1px solid color-mix(in srgb,var(--line) 80%,transparent);box-shadow:0 10px 30px -18px rgba(20,33,26,.35);transition:top .3s ease,width .3s ease}
 .nav.small{top:8px;width:min(860px,calc(100% - 24px))}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:600 1.15rem var(--font-display)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none;font:600 1.15rem var(--font-display)}
 .brand i{width:32px;height:32px;border-radius:10px;background:var(--forest);color:var(--forest-ink);display:grid;place-items:center;font:700 .95rem var(--font-display);font-style:normal}
-.nav .links{margin-left:auto;display:flex;gap:4px;font-size:.9rem;font-weight:600}
+.nav .links{margin-left:auto;display:flex;gap:4px;font-size:.9rem;font-weight:600;white-space:nowrap}
 .nav .links a{text-decoration:none;color:var(--muted);padding:8px 12px;border-radius:999px;transition:background .2s,color .2s}
 .nav .links a:hover,.nav .links a.on{color:var(--ink);background:color-mix(in srgb,var(--ink) 7%,transparent)}
-.nav .btn{padding:9px 16px;font-size:.86rem}
+.nav .btn{padding:9px 16px;font-size:.86rem;white-space:nowrap}
 .menu-btn{display:none;margin-left:auto;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink)}
-@media (max-width:900px){
+@media (max-width:1000px){
   .nav .links{position:absolute;top:calc(100% + 8px);left:0;right:0;flex-direction:column;padding:10px;border-radius:22px;background:var(--surface);border:1px solid var(--line);box-shadow:0 20px 40px -20px rgba(0,0,0,.4);display:none}
   .nav.open .links{display:flex}
   .nav .links a{padding:12px 14px}
@@ -138,7 +138,7 @@ section{padding:96px 0;position:relative}
 .checks li::before{content:"";width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--forest) 16%,transparent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232F7A57' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/13px no-repeat}
 
 /* modelos */
-.models{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;perspective:900px}
+.models{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;perspective:900px}
 @media (max-width:1000px){.models{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:560px){.models{grid-template-columns:1fr}}
 .model{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transform-style:preserve-3d;transition:transform .25s ease,box-shadow .25s ease}
@@ -346,12 +346,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
 
 <section id="modelos" style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">Modelos de site</span><h2 class="fill">Um estilo para cada tipo de pousada</h2><p class="reveal">Versões de uma página para começar rápido: acomodações com preço, comodidades, galeria em tela cheia, localização e botão de WhatsApp.</p></div>
+    <div class="sec-head"><span class="eyebrow">Modelos de site</span><h2 class="fill">Um estilo para cada tipo de pousada</h2><p class="reveal">Versões de uma página para começar rápido: acomodações com preço, comodidades, galeria, localização e botão de WhatsApp.</p></div>
     <div class="models">
       <a class="model reveal" style="--c:#B5562B;--i:0" href="serra/"><span class="ph"><img src="img/serra/hero.webp" alt="Chalés de madeira entre araucárias" width="1376" height="768" loading="lazy"></span><div><small>Chalés na serra</small><h3>Cantinho da Serra</h3><p>Lareira, café colonial e trilhas.</p><span class="go">Ver modelo →</span></div></a>
       <a class="model reveal" style="--c:#0E8FB0;--i:1" href="mar/"><span class="ph"><img src="img/mar/hero.webp" alt="Pousada de casas brancas diante do mar turquesa" width="1376" height="768" loading="lazy"></span><div><small>Pé na areia</small><h3>Maré Mansa</h3><p>Piscina, mar calmo e rede na varanda.</p><span class="go">Ver modelo →</span></div></a>
       <a class="model reveal" style="--c:#9B3A4C;--i:2" href="colonial/"><span class="ph"><img src="img/colonial/hero.webp" alt="Casarão colonial amarelo em rua de pedra" width="1376" height="768" loading="lazy"></span><div><small>Centro histórico</small><h3>Casarão Colonial</h3><p>Casarão de 1890 com pátio interno.</p><span class="go">Ver modelo →</span></div></a>
       <a class="model reveal" style="--c:#3E7D32;--i:3" href="mata/"><span class="ph"><img src="img/mata/hero.webp" alt="Bangalôs sobre palafitas à beira do igarapé" width="1376" height="768" loading="lazy"></span><div><small>Ecopousada</small><h3>Recanto da Mata</h3><p>Bangalôs na floresta e banho de igarapé.</p><span class="go">Ver modelo →</span></div></a>
+      <a class="model reveal" style="--c:#4a5d46;--i:4" href="recanto/"><span class="ph"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=75" alt="Pousada boutique com piscina entre montanhas" width="800" height="600" loading="lazy"></span><div><small>Boutique na serra</small><h3>Recanto da Serra</h3><p>Chalés com hidro, piscina e café colonial.</p><span class="go">Ver modelo →</span></div></a>
+      <a class="model reveal" style="--c:#b45309;--i:5" href="cantinho/"><span class="ph"><img src="https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=800&q=75" alt="Pousada familiar aconchegante" width="800" height="600" loading="lazy"></span><div><small>Pousada familiar</small><h3>Cantinho do Sol</h3><p>Simples, com simulador e WhatsApp.</p><span class="go">Ver modelo →</span></div></a>
     </div>
   </div>
 </section>

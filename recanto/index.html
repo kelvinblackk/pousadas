@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pousada Recanto da Serra | Experiencia Boutique na Natureza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        olive: {
+                            50: '#f4f6f3',
+                            100: '#e5eae2',
+                            600: '#4a5d46',
+                            800: '#2d3a2a',
+                            900: '#1e271c',
+                        },
+                        sand: {
+                            50: '#fdfbf7',
+                            100: '#f7f2e7',
+                            200: '#efe5cf',
+                            600: '#b89f6d',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-sand-50 text-stone-800 font-sans antialiased">
+
+    <!-- Navbar -->
+    <header class="fixed w-full top-0 z-40 bg-olive-900/90 backdrop-blur-md text-sand-50 transition-all border-b border-white/10">
+        <div style="background:#1e271c;color:#f7f2e7;text-align:center;font:600 13px/1.4 system-ui,sans-serif;padding:7px 12px">Modelo demonstrativo · pousada fictícia · fotos ilustrativas</div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="#" class="font-serif text-2xl font-bold tracking-wider text-sand-100">
+                RECANTO DA SERRA
+                <span class="block text-[10px] font-sans tracking-[0.25em] text-sand-600 uppercase font-normal">Pousada Boutique</span>
+            </a>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#sobre" class="hover:text-sand-600 transition">A Pousada</a>
+                <a href="#acomodacoes" class="hover:text-sand-600 transition">Acomodações</a>
+                <a href="#comodidades" class="hover:text-sand-600 transition">Experiências</a>
+                <a href="#galeria" class="hover:text-sand-600 transition">Galeria</a>
+                <a href="#faq" class="hover:text-sand-600 transition">Dúvidas</a>
+            </nav>
+            <a href="#reserva" class="bg-sand-600 hover:bg-sand-200 hover:text-olive-900 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition">
+                Reservar Agora
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center text-center text-white pt-36 pb-16">
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=85" alt="Pousada Recanto da Serra" class="w-full h-full object-cover brightness-50">
+        </div>
+        <div class="relative z-10 max-w-4xl mx-auto px-4">
+            <span class="uppercase tracking-[0.3em] text-xs md:text-sm text-sand-200 bg-olive-900/60 px-4 py-1.5 rounded-full border border-sand-200/30">Refúgio exclusivo nas montanhas</span>
+            <h1 class="font-serif text-4xl md:text-6xl lg:text-7xl mt-6 mb-6 leading-tight">Onde o tempo desacelera e a natureza abraça</h1>
+            <p class="text-lg md:text-xl text-stone-200 max-w-2xl mx-auto font-light mb-10">Chalés privativos com vista panorâmica, gastronomia afetiva e o silêncio revigorante da serra.</p>
+
+            <!-- Barra de Busca de Disponibilidade -->
+            <div id="reserva" class="bg-white/95 backdrop-blur-md p-4 md:p-6 rounded-2xl shadow-2xl text-stone-800 max-w-4xl mx-auto">
+                <form id="bookingForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="text-left">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Check-in</label>
+                        <input type="date" id="checkin" required class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-olive-600">
+                    </div>
+                    <div class="text-left">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Check-out</label>
+                        <input type="date" id="checkout" required class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-olive-600">
+                    </div>
+                    <div class="text-left">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Hóspedes</label>
+                        <select id="guests" class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-olive-600">
+                            <option value="2 Adultos">2 Adultos (Casal)</option>
+                            <option value="2 Adultos + 1 Criança">2 Adultos + 1 Criança</option>
+                            <option value="3 Adultos">3 Adultos</option>
+                            <option value="4 Pessoas (Família)">4 Pessoas (Família)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-olive-800 hover:bg-olive-900 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md">
+                        Consultar Tarifas
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre -->
+    <section id="sobre" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="text-olive-600 font-semibold tracking-widest uppercase text-xs">Nossa Essência</span>
+                <h2 class="font-serif text-3xl md:text-4xl text-olive-900 mt-2 mb-6">Hospitalidade artesanal em meio à mata preservada</h2>
+                <p class="text-stone-600 leading-relaxed mb-4">
+                    Localizada a 1.200 metros de altitude, a <strong>Pousada Recanto da Serra</strong> nasceu do desejo de oferecer um descanso autêntico. Cada detalhe foi pensado para integrar o conforto da hotelaria boutique com o charme rústico do campo.
+                </p>
+                <p class="text-stone-600 leading-relaxed mb-6">
+                    Acorde com o canto dos pássaros, saboreie pães de fermentação natural, queijos artesanais e geleias feitas no fogão a lenha, e termine o dia contemplando o pôr do sol na piscina de borda infinita.
+                </p>
+                <div class="grid grid-cols-3 gap-4 border-t border-stone-200 pt-6 text-center">
+                    <div>
+                        <span class="font-serif text-3xl font-bold text-olive-800">12</span>
+                        <p class="text-xs text-stone-500 mt-1">Chalés Exclusivos</p>
+                    </div>
+                    <div>
+                        <span class="font-serif text-3xl font-bold text-olive-800">40 mil</span>
+                        <p class="text-xs text-stone-500 mt-1">m² de Área Verde</p>
+                    </div>
+                    <div>
+                        <span class="font-serif text-3xl font-bold text-olive-800">1.200 m</span>
+                        <p class="text-xs text-stone-500 mt-1">de Altitude</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80" alt="Vista da Pousada" class="rounded-2xl shadow-lg w-full h-72 object-cover">
+                <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80" alt="Spa e Relaxamento" class="rounded-2xl shadow-lg w-full h-72 object-cover mt-8">
+            </div>
+        </div>
+    </section>
+
+    <!-- Acomodações -->
+    <section id="acomodacoes" class="py-20 bg-sand-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-14">
+                <span class="text-olive-600 font-semibold tracking-widest uppercase text-xs">Conforto & Privacidade</span>
+                <h2 class="font-serif text-3xl md:text-4xl text-olive-900 mt-2">Nossas Acomodações</h2>
+                <p class="text-stone-600 mt-3">Enxoval 400 fios, lareira ecológica e varandas com rede para você viver momentos inesquecíveis.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Quarto 1 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col">
+                    <div class="relative h-64">
+                        <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80" alt="Suíte Master com Hidro" class="w-full h-full object-cover">
+                        <span class="absolute top-4 right-4 bg-olive-900 text-white text-xs font-semibold px-3 py-1 rounded-full">Destaque</span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl text-olive-900 font-bold">Suíte Master com Hidro</h3>
+                            <p class="text-stone-600 text-sm mt-2">Cama King Size, banheira de hidromassagem dupla com vista para o vale, lareira e adega climatizada.</p>
+                            <ul class="mt-4 space-y-1 text-xs text-stone-500">
+                                <li>• 55m² privativos • Deck panorâmico</li>
+                                <li>• Café da manhã servido no chalé opcional</li>
+                                <li>• Smart TV 55", Wi-Fi fibra e Ar Split</li>
+                            </ul>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-stone-400 block">Diárias a partir de</span>
+                                <span class="text-xl font-bold text-olive-800">R$ 790</span>
+                            </div>
+                            <button onclick="openBookingModal('Suíte Master com Hidro', 790)" class="bg-olive-800 hover:bg-olive-900 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                                Selecionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarto 2 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col">
+                    <div class="relative h-64">
+                        <img src="https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80" alt="Chalé Romântico Vista Vale" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl text-olive-900 font-bold">Chalé Romântico Vista Vale</h3>
+                            <p class="text-stone-600 text-sm mt-2">Arquitetura alpina em madeira nobre, varanda com rede, lareira a lenha e chuveiro de alta pressão.</p>
+                            <ul class="mt-4 space-y-1 text-xs text-stone-500">
+                                <li>• 42m² privativos • Cama Queen Size</li>
+                                <li>• Cafeteira Nespresso e frigobar retrô</li>
+                                <li>• Roupões macios e amenidades veganas</li>
+                            </ul>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-stone-400 block">Diárias a partir de</span>
+                                <span class="text-xl font-bold text-olive-800">R$ 580</span>
+                            </div>
+                            <button onclick="openBookingModal('Chalé Romântico Vista Vale', 580)" class="bg-olive-800 hover:bg-olive-900 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                                Selecionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quarto 3 -->
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition flex flex-col">
+                    <div class="relative h-64">
+                        <img src="https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=800&q=80" alt="Suíte Jardim Standard" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-serif text-2xl text-olive-900 font-bold">Suíte Jardim Família</h3>
+                            <p class="text-stone-600 text-sm mt-2">Cercada por jardins floridos, ideal para casais ou famílias pequenas que buscam praticidade e sossego.</p>
+                            <ul class="mt-4 space-y-1 text-xs text-stone-500">
+                                <li>• 35m² • 1 Cama Queen + 1 Solteiro</li>
+                                <li>• Acesso direto ao gramado e piscina</li>
+                                <li>• Ar-condicionado Quente/Frio e Wi-Fi</li>
+                            </ul>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-stone-400 block">Diárias a partir de</span>
+                                <span class="text-xl font-bold text-olive-800">R$ 420</span>
+                            </div>
+                            <button onclick="openBookingModal('Suíte Jardim Família', 420)" class="bg-olive-800 hover:bg-olive-900 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                                Selecionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comodidades -->
+    <section id="comodidades" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-14">
+            <span class="text-olive-600 font-semibold tracking-widest uppercase text-xs">Lazer & Bem-Estar</span>
+            <h2 class="font-serif text-3xl md:text-4xl text-olive-900 mt-2">Experiências Inclusas na Diária</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="p-6 bg-white rounded-2xl border border-stone-200/70 shadow-sm">
+                <div class="text-3xl mb-3">🥐</div>
+                <h4 class="font-serif text-lg font-bold text-olive-900">Café Colonial Artesanal</h4>
+                <p class="text-sm text-stone-600 mt-2">Servido até as 11h com pães quentinhos, bolos caseiros, frutas da estação e ovos caipiras feitos na hora.</p>
+            </div>
+            <div class="p-6 bg-white rounded-2xl border border-stone-200/70 shadow-sm">
+                <div class="text-3xl mb-3">🏊</div>
+                <h4 class="font-serif text-lg font-bold text-olive-900">Piscina Climatizada</h4>
+                <p class="text-sm text-stone-600 mt-2">Borda infinita com vista para as montanhas, espreguiçadeiras e serviço de bar com drinks autorais.</p>
+            </div>
+            <div class="p-6 bg-white rounded-2xl border border-stone-200/70 shadow-sm">
+                <div class="text-3xl mb-3">🌲</div>
+                <h4 class="font-serif text-lg font-bold text-olive-900">Trilhas & Cachoeira</h4>
+                <p class="text-sm text-stone-600 mt-2">Trilha ecológica interna de nível leve que leva a um deck privativo para banho de rio cristalino.</p>
+            </div>
+            <div class="p-6 bg-white rounded-2xl border border-stone-200/70 shadow-sm">
+                <div class="text-3xl mb-3">🔥</div>
+                <h4 class="font-serif text-lg font-bold text-olive-900">Fogo de Chão & Vinhos</h4>
+                <p class="text-sm text-stone-600 mt-2">Ao entardecer, acendemos nossa lareira externa com marshmallows e carta selecionada de vinhos.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Galeria -->
+    <section id="galeria" class="py-20 bg-olive-900 text-sand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-sand-600 font-semibold tracking-widest uppercase text-xs">Momentos</span>
+                <h2 class="font-serif text-3xl md:text-4xl mt-2">Galeria da Pousada</h2>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=600&q=80" alt="Piscina" class="rounded-xl h-56 w-full object-cover hover:opacity-90 transition">
+                <img src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600&q=80" alt="Café da Manhã" class="rounded-xl h-56 w-full object-cover hover:opacity-90 transition">
+                <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=600&q=80" alt="Área Externa" class="rounded-xl h-56 w-full object-cover hover:opacity-90 transition">
+                <img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=600&q=80" alt="Quarto" class="rounded-xl h-56 w-full object-cover hover:opacity-90 transition">
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="font-serif text-3xl text-center text-olive-900 mb-10">Perguntas Frequentes</h2>
+        <div class="space-y-4">
+            <details class="bg-white p-5 rounded-xl border border-stone-200 cursor-pointer">
+                <summary class="font-semibold text-olive-900">Qual o horário de Check-in e Check-out?</summary>
+                <p class="text-sm text-stone-600 mt-2">O check-in inicia às 14h00 e o check-out vai até as 12h00. Consulte disponibilidade para late check-out aos domingos.</p>
+            </details>
+            <details class="bg-white p-5 rounded-xl border border-stone-200 cursor-pointer">
+                <summary class="font-semibold text-olive-900">A pousada aceita animais de estimação (Pet Friendly)?</summary>
+                <p class="text-sm text-stone-600 mt-2">Sim! Aceitamos pets de pequeno e médio porte nas unidades Suíte Jardim Família mediante aviso prévio.</p>
+            </details>
+            <details class="bg-white p-5 rounded-xl border border-stone-200 cursor-pointer">
+                <summary class="font-semibold text-olive-900">O acesso até a pousada é asfaltado?</summary>
+                <p class="text-sm text-stone-600 mt-2">Sim, 95% do trajeto é asfaltado, restando apenas 800 metros de estrada de terra batida em ótimas condições para qualquer veículo de passeio.</p>
+            </details>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <span class="font-serif text-xl text-white font-bold">POUSADA RECANTO DA SERRA</span>
+                <p class="text-xs mt-1">Estrada do Vale Verde, Km 12 • Serra Azul (endereço ilustrativo)</p>
+            </div>
+            <div class="text-sm">
+                WhatsApp Reservas: <strong class="text-white">(95) 98102-0209</strong><br><span class="text-xs">Modelo de site demonstrativo desenvolvido por Kelvin Jordan</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Reserva -->
+    <div id="modalReserva" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <h3 id="modalTitle" class="font-serif text-2xl text-olive-900 font-bold mb-2">Finalizar Pré-Reserva</h3>
+            <p id="modalPrice" class="text-sm text-olive-600 font-semibold mb-4"></p>
+            <form id="modalForm" class="space-y-3">
+                <input type="text" id="clientName" required placeholder="Seu nome completo" class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm">
+                <input type="tel" id="clientPhone" required placeholder="Seu WhatsApp com DDD" class="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm">
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeBookingModal()" class="w-1/2 border border-stone-300 text-stone-700 py-2.5 rounded-lg text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-olive-800 text-white py-2.5 rounded-lg text-sm font-semibold">Enviar no WhatsApp</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedRoom = 'Suíte Master com Hidro';
+        let selectedRate = 790;
+
+        // Preencher datas padrão (hoje e +2 dias)
+        const today = new Date();
+        const twoDaysLater = new Date();
+        twoDaysLater.setDate(today.getDate() + 2);
+        document.getElementById('checkin').valueAsDate = today;
+        document.getElementById('checkout').valueAsDate = twoDaysLater;
+
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('acomodacoes').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function openBookingModal(room, rate) {
+            selectedRoom = room;
+            selectedRate = rate;
+            document.getElementById('modalTitle').textContent = room;
+            document.getElementById('modalPrice').textContent = `Tarifa base: R$ ${rate}/diária (Café da manhã incluso)`;
+            const modal = document.getElementById('modalReserva');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBookingModal() {
+            const modal = document.getElementById('modalReserva');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('modalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('clientName').value;
+            const checkin = document.getElementById('checkin').value;
+            const checkout = document.getElementById('checkout').value;
+            const guests = document.getElementById('guests').value;
+            const msg = encodeURIComponent(`Olá! Meu nome é ${name}. Gostaria de consultar disponibilidade para a acomodação *${selectedRoom}* (R$ ${selectedRate}/noite) de ${checkin} até ${checkout} para ${guests}.`);
+            window.open(`https://wa.me/5595981020209?text=${msg}`, '_blank');
+            closeBookingModal();
+        });
+    </script>
+</body>
+</html>
